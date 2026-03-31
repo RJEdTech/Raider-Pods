@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Raider Pod Generator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f0f1a;color:#eee;min-height:100vh;padding:20px 16px}
+.ctr{max-width:800px;margin:0 auto}
+.hdr{text-align:center;margin-bottom:18px}
+.hdr .sub{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#666;margin-bottom:3px}
+.hdr h1{font-size:26px;font-weight:800;background:linear-gradient(135deg,#C11430,#D4243B);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .tag{font-size:11px;color:#666;margin-top:3px}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:10px}
+.sl{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px}
+textarea{width:100%;min-height:70px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.3);color:#eee;font-size:13px;font-family:inherit;resize:vertical;outline:none}
+textarea::placeholder{color:#555}
+.btn{padding:7px 18px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(135deg,#C11430,#D4243B);color:#fff;font-weight:700;font-size:12px;font-family:inherit}
+.btn:hover{opacity:.9}
+.btn-lg{font-size:15px;padding:12px 40px;border-radius:10px}
+.bo{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:0 0;color:#ccc;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600}
+.bo:hover{background:rgba(255,255,255,.05)}
+.r{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+/* Tabs */
+.vtabs{display:flex;gap:4px;margin-bottom:12px;justify-content:center}
+.vtab{padding:6px 16px;border-radius:6px;border:1px solid transparent;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;background:rgba(255,255,255,.04);color:#888}
+.vtab.a{background:rgba(193,20,48,.15);color:#C11430;border-color:rgba(193,20,48,.3)}
+
+/* Mode buttons */
+.mode-btn{padding:5px 14px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;background:rgba(255,255,255,.03);color:#888;border:1px solid transparent}
+.mode-btn.a{background:rgba(193,20,48,.12);color:#C11430;border-color:rgba(193,20,48,.3)}
+
+/* Saved class buttons */
+.sv-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#ccc;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600}
+.sv-btn:hover{background:rgba(255,255,255,.08)}
+.sv-btn .dx{margin-left:5px;color:#666;cursor:pointer}
+.sv-btn .dx:hover{color:#C11430}
+
+/* Drop buckets */
+.bucket{padding:12px;border-radius:10px;min-height:52px;transition:all .15s;margin-bottom:8px}
+.bucket.over{background:rgba(193,20,48,.07)!important;border-color:rgba(193,20,48,.3)!important}
+.bucket-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;display:flex;justify-content:space-between}
+.bucket-names{display:flex;flex-wrap:wrap;gap:5px}
+.bucket-empty{font-size:11px;color:#444;font-style:italic}
+
+/* Name chips */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:6px;cursor:grab;user-select:none;color:#ddd;font-size:12px;font-weight:600;transition:all .1s;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
+.chip.dragging{opacity:.4}
+.chip .ql{font-size:9px;color:#666;font-weight:400}
+
+/* Unsorted pool */
+.pool{padding:12px;border-radius:10px;margin-bottom:10px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.12);min-height:40px}
+
+/* Never-pair */
+.np-tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(193,20,48,.07);color:#C11430}
+.np-tag .x{cursor:pointer;opacity:.6}
+.np-tag .x:hover{opacity:1}
+select{padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.3);color:#eee;font-size:12px;font-family:inherit;outline:none;min-width:140px}
+
+/* Pod cards */
+.pod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-bottom:16px}
+.pod{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px}
+.pod.conflict{border-color:rgba(255,80,80,.35)}
+.pod-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.pod-hdr .label{font-size:10px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:1.5px}
+.pod-badge{font-size:9px;padding:2px 8px;border-radius:10px}
+.pod-dir{font-size:8px;color:#444;text-align:center;text-transform:uppercase;letter-spacing:2px}
+.pod-row{display:flex;justify-content:center;gap:8px}
+.pod-mid{display:flex;align-items:center;font-size:8px;color:#444}
+.pod-shoulder{display:flex;justify-content:center;gap:70px;margin:2px 0}
+.pod-shoulder span{font-size:8px;color:#444}
+
+/* Seats */
+.seat{width:110px;padding:6px 4px;border-radius:8px;cursor:pointer;text-align:center;transition:all .15s;position:relative;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.seat:hover{background:rgba(255,255,255,.06)}
+.seat.locked{background:rgba(193,20,48,.08);border:2px solid rgba(193,20,48,.33)}
+.seat.violation{background:rgba(255,80,80,.08);border-color:rgba(255,80,80,.3)}
+.seat .nm{font-size:12px;font-weight:700;color:#eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .qt{font-size:9px;color:#666;margin-top:1px}
+.seat .lock{position:absolute;top:2px;right:4px;font-size:9px}
+
+/* Legend */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:6px 12px;border-radius:8px;background:rgba(255,255,255,.02);font-size:10px;color:#666;align-items:center}
+.legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px}
+
+/* Summary */
+.summary{text-align:center;font-size:11px;color:#666}
+
+/* Reference diagram */
+.ref pre{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#777;line-height:1.7}
+.ref-title{font-size:10px;color:#666;margin-bottom:4px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:8px 20px;border-radius:8px;background:#C11430;color:#fff;font-weight:700;font-size:12px;z-index:100;display:none;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.toast.show{display:block}
+
+/* Footer */
+.ftr{text-align:center;margin-top:24px;padding-top:12px;font-size:9px;color:#444;border-top:1px solid rgba(255,255,255,.04)}
+
+.hid{display:none!important}
+
+/* Quartile bucket colors */
+.bq1{background:rgba(193,20,48,.09);border:1px solid rgba(193,20,48,.2)}
+.bq2{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.bq3{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.bq4{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06)}
+.bq1 .bucket-label{color:#C11430}
+.bq2 .bucket-label,.bq3 .bucket-label,.bq4 .bucket-label{color:#888}
+.cq1{background:rgba(193,20,48,.09);border-color:rgba(193,20,48,.2)}
+.cq2{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.cq3{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08)}
+.cq4{background:rgba(0,0,0,.2);border-color:rgba(255,255,255,.06)}
+
+/* Light mode */
+body.light{background:#fff;color:#1a1a1a}
+body.light .hdr .sub{color:#999}
+body.light .hdr h1{background:linear-gradient(135deg,#C11430,#8a0e22);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+body.light .hdr .tag{color:#999}
+body.light .card{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
+body.light .sl{color:#666}
+body.light textarea{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.1);color:#1a1a1a}
+body.light textarea::placeholder{color:#aaa}
+body.light .bo{border-color:rgba(0,0,0,.15);color:#444}
+body.light .bo:hover{background:rgba(0,0,0,.04)}
+body.light .vtab{background:rgba(0,0,0,.03);color:#888}
+body.light .vtab.a{background:rgba(193,20,48,.08);color:#C11430;border-color:rgba(193,20,48,.2)}
+body.light .mode-btn{background:rgba(0,0,0,.03);color:#888;border-color:rgba(0,0,0,.06)}
+body.light .mode-btn.a{background:rgba(193,20,48,.08);color:#C11430;border-color:rgba(193,20,48,.2)}
+body.light .chip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:#333}
+body.light .chip .ql{color:#999}
+body.light .pool{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.1)}
+body.light .bucket-empty{color:#bbb}
+body.light .np-tag{background:rgba(193,20,48,.06);color:#C11430}
+body.light select{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.1);color:#1a1a1a}
+body.light .pod{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
+body.light .pod.conflict{border-color:rgba(255,80,80,.3)}
+body.light .pod-hdr .label{color:#999}
+body.light .pod-dir{color:#bbb}
+body.light .pod-mid{color:#bbb}
+body.light .pod-shoulder span{color:#bbb}
+body.light .seat{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+body.light .seat:hover{background:rgba(0,0,0,.05)}
+body.light .seat.locked{background:rgba(193,20,48,.06);border-color:rgba(193,20,48,.2)}
+body.light .seat .nm{color:#1a1a1a}
+body.light .seat .qt{color:#999}
+body.light .legend{background:rgba(0,0,0,.02);color:#999}
+body.light .summary{color:#999}
+body.light .ref pre{color:#999}
+body.light .ref-title{color:#999}
+body.light .sv-btn{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.1);color:#444}
+body.light .sv-btn:hover{background:rgba(0,0,0,.06)}
+body.light .ftr{color:#ccc;border-color:rgba(0,0,0,.06)}
+body.light .bq1{background:rgba(193,20,48,.05);border-color:rgba(193,20,48,.12)}
+body.light .bq2{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+body.light .bq3{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06)}
+body.light .bq4{background:rgba(0,0,0,.01);border-color:rgba(0,0,0,.05)}
+body.light .bq1 .bucket-label{color:#C11430}
+body.light .cq1{background:rgba(193,20,48,.05);border-color:rgba(193,20,48,.12)}
+body.light .cq2{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+body.light .cq3{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06)}
+body.light .cq4{background:rgba(0,0,0,.01);border-color:rgba(0,0,0,.05)}
+</style>
+</head>
+<body>
+<div class="ctr">
+  <div class="hdr">
+    <div class="sub">Regis Jesuit High School</div>
+    <h1>Raider Pod Generator</h1>
+    <div class="tag">Kagan heterogeneous pods · Shoulder partners 2 quartiles apart · No data leaves your browser</div>
+  </div>
+
+  <!-- Toolbar -->
+  <div style="display:flex;gap:6px;justify-content:flex-end;margin-bottom:10px;flex-wrap:wrap">
+    <button class="bo" id="themeTgl" style="display:flex;align-items:center;gap:3px;font-size:11px">☀ Light Mode</button>
+  </div>
+
+  <!-- View Tabs -->
+  <div class="vtabs">
+    <button class="vtab a" id="tabSetup">Setup &amp; Sort</button>
+    <button class="vtab" id="tabPods">Pods</button>
+  </div>
+
+  <!-- ======== SETUP VIEW ======== -->
+  <div id="vSetup">
+
+    <!-- Saved Classes -->
+    <div class="card" id="svCard" style="display:none">
+      <div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Saved Classes</div>
+      <div class="r" id="svList" style="gap:5px"></div>
+    </div>
+
+    <!-- Input Mode -->
+    <div class="card">
+      <div class="r" style="gap:4px;margin-bottom:10px">
+        <button class="mode-btn a" id="modeDrag">Paste Names → Drag to Sort</button>
+        <button class="mode-btn" id="modePaste">Paste Directly into Quartiles</button>
+      </div>
+
+      <!-- DRAG MODE -->
+      <div id="dragMode">
+        <textarea id="inp" placeholder="Paste student names — one per line or comma-separated"></textarea>
+        <div class="r" style="margin-top:8px;margin-bottom:12px">
+          <button class="btn" id="loadBtn">Load Names</button>
+          <button class="bo hid" id="saveBtn">Save as Class</button>
+          <button class="bo hid" id="clearBtn">Clear All</button>
+          <span id="sortCount" style="font-size:11px;color:#888;font-family:'IBM Plex Mono',monospace"></span>
+        </div>
+
+        <!-- Unsorted Pool -->
+        <div class="pool hid" id="poolArea">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span class="sl" style="margin:0">Unsorted Pool</span>
+            <span id="poolCount" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#888"></span>
+          </div>
+          <div class="bucket-names" id="poolNames"></div>
+        </div>
+
+        <!-- Quartile Buckets -->
+        <div id="buckets">
+          <div class="bucket bq1" data-q="1"><div class="bucket-label"><span>Q1 · Top 25% (Highest)</span><span id="bc1" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn1"></div><div class="bucket-empty" id="be1">Drag students here</div></div>
+          <div class="bucket bq2" data-q="2"><div class="bucket-label"><span>Q2 · 50–75%</span><span id="bc2" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn2"></div><div class="bucket-empty" id="be2">Drag students here</div></div>
+          <div class="bucket bq3" data-q="3"><div class="bucket-label"><span>Q3 · 25–50%</span><span id="bc3" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn3"></div><div class="bucket-empty" id="be3">Drag students here</div></div>
+          <div class="bucket bq4" data-q="4"><div class="bucket-label"><span>Q4 · Bottom 25% (Lowest)</span><span id="bc4" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn4"></div><div class="bucket-empty" id="be4">Drag students here</div></div>
+        </div>
+      </div>
+
+      <!-- PASTE MODE -->
+      <div id="pasteMode" class="hid">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div><div class="sl" style="color:#C11430">Q1 · Top 25% (Highest)</div><textarea id="pq1" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+          <div><div class="sl">Q2 · 50–75%</div><textarea id="pq2" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+          <div><div class="sl">Q3 · 25–50%</div><textarea id="pq3" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+          <div><div class="sl">Q4 · Bottom 25% (Lowest)</div><textarea id="pq4" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+        </div>
+        <div class="r" style="margin-top:8px">
+          <button class="btn" id="pasteLoadBtn">Load into Quartiles</button>
+          <button class="bo hid" id="saveBtnP">Save as Class</button>
+          <button class="bo hid" id="clearBtnP">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Never-Pair Rules -->
+    <div class="card hid" id="npCard">
+      <div class="sl">Never-Pair Rules</div>
+      <div class="r" style="margin-bottom:6px">
+        <select id="npA"><option value="">Student A…</option></select>
+        <span style="font-size:12px;color:#555;font-weight:700">≠</span>
+        <select id="npB"><option value="">Student B…</option></select>
+        <button class="bo" id="npAdd" style="color:#C11430;border-color:rgba(193,20,48,.2)">+ Add</button>
+      </div>
+      <div id="npList"></div>
+      <div id="npEmpty" style="font-size:11px;color:#444">No rules — all pairings allowed</div>
+    </div>
+
+    <!-- Generate -->
+    <div class="hid" id="genArea" style="text-align:center;margin-top:16px">
+      <button class="btn btn-lg" id="genBtn">Generate Pods</button>
+      <div id="unsortedWarn" class="hid" style="font-size:11px;color:#888;margin-top:6px"></div>
+    </div>
+
+    <!-- Reference Diagram -->
+    <div class="card ref" id="refDiagram" style="margin-top:16px">
+      <div style="font-size:12px;font-weight:700;color:#aaa;margin-bottom:8px">How Kagan Pod Seating Works</div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div><div class="ref-title">Pod of 4 (default):</div><pre>┌──────────┬──────────┐
+│ Q1  Top  │ Q2  2nd  │ ← Far
+│  25%     │  25%     │
+├─shoulder──┼─shoulder──┤
+│ Q3  3rd  │ Q4  Low  │ ← Near
+│  25%     │  25%     │
+└──────────┴──────────┘
+Shoulder: Q1↕Q3, Q2↕Q4 (2 apart)
+Face:     Q1↔Q2, Q3↔Q4 (1 apart)</pre></div>
+        <div><div class="ref-title">Pod of 3 (remainder):</div><pre>     ┌─────────┐
+     │ Q1 Top  │ ← Far
+     │         │
+  ┌──┴────┬────┴──┐
+  │ Q2 Mid│Q3 Low │ ← Near
+  │       │       │
+  └───────┴───────┘</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PODS VIEW ======== -->
+  <div id="vPods" class="hid">
+    <div class="r" style="justify-content:center;margin-bottom:12px">
+      <button class="btn" id="reshuffleBtn">↻ Reshuffle</button>
+      <button class="bo" id="copyBtn">📋 Copy Pods</button>
+      <button class="bo" id="backBtn">← Back to Setup</button>
+    </div>
+    <div class="legend" id="legend">
+      <span><span class="dot" style="background:rgba(193,20,48,.33)"></span>Q1 · Top 25%</span>
+      <span><span class="dot" style="background:rgba(255,255,255,.12)"></span>Q2 · 50–75%</span>
+      <span><span class="dot" style="background:rgba(255,255,255,.08)"></span>Q3 · 25–50%</span>
+      <span><span class="dot" style="background:rgba(255,255,255,.06)"></span>Q4 · Bottom 25%</span>
+      <span style="color:#555">· Click to lock 🔒</span>
+    </div>
+    <div class="pod-grid" id="podGrid"></div>
+    <div class="summary" id="podSummary"></div>
+    <div id="emptyPods" class="hid" style="text-align:center;padding:40px 0;color:#555">
+      <div style="font-size:14px;margin-bottom:8px">No pods generated yet</div>
+      <button class="btn" id="goSetupBtn">Go to Setup</button>
+    </div>
+  </div>
+
+  <div class="ftr">Raider Pod Generator · Kagan Heterogeneous Grouping · No data leaves your browser</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+var Q_SHORT=["","Q1","Q2","Q3","Q4"];
+var unsorted=[],quartiles={1:[],2:[],3:[],4:[]},pods=[],neverPairs=[],locked={};
+var inputMode="drag",currentView="setup";
+
+function $(id){return document.getElementById(id)}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2000)}
+function copyText(t){navigator.clipboard.writeText(t).then(function(){toast("Copied!")}).catch(function(){toast("Copy failed")})}
+
+// Storage
+function getSv(){try{return JSON.parse(localStorage.getItem("rr_pods_v3")||"{}")}catch(e){return{}}}
+function setSv(d){try{localStorage.setItem("rr_pods_v3",JSON.stringify(d))}catch(e){}}
+
+// Theme
+var isLight=false;
+try{isLight=localStorage.getItem("rr_pod_theme")==="light"}catch(e){}
+if(isLight){document.body.classList.add("light");$("themeTgl").textContent="🌙 Dark Mode"}
+$("themeTgl").addEventListener("click",function(){
+  isLight=!isLight;document.body.classList.toggle("light",isLight);
+  $("themeTgl").textContent=isLight?"🌙 Dark Mode":"☀ Light Mode";
+  try{localStorage.setItem("rr_pod_theme",isLight?"light":"dark")}catch(e){}
+});
+
+// View switching
+function switchView(v){
+  currentView=v;
+  $("vSetup").classList.toggle("hid",v!=="setup");
+  $("vPods").classList.toggle("hid",v!=="pods");
+  $("tabSetup").classList.toggle("a",v==="setup");
+  $("tabPods").classList.toggle("a",v==="pods");
+  if(v==="pods") renderPods();
+}
+$("tabSetup").addEventListener("click",function(){switchView("setup")});
+$("tabPods").addEventListener("click",function(){switchView("pods")});
+$("backBtn").addEventListener("click",function(){switchView("setup")});
+$("goSetupBtn").addEventListener("click",function(){switchView("setup")});
+
+// Input mode
+function switchMode(m){
+  inputMode=m;
+  $("dragMode").classList.toggle("hid",m!=="drag");
+  $("pasteMode").classList.toggle("hid",m!=="paste");
+  $("modeDrag").classList.toggle("a",m==="drag");
+  $("modePaste").classList.toggle("a",m==="paste");
+}
+$("modeDrag").addEventListener("click",function(){switchMode("drag")});
+$("modePaste").addEventListener("click",function(){switchMode("paste")});
+
+// All students helper
+function allStudents(){
+  return unsorted.concat(quartiles[1],quartiles[2],quartiles[3],quartiles[4]);
+}
+function sortedCount(){
+  return quartiles[1].length+quartiles[2].length+quartiles[3].length+quartiles[4].length;
+}
+
+// Render UI
+function renderAll(){
+  renderPool();
+  renderBuckets();
+  renderSaved();
+  renderNeverPair();
+  updateCounts();
+  var all=allStudents(),sc=sortedCount();
+  // Show/hide elements
+  $("saveBtn").classList.toggle("hid",all.length===0);
+  $("clearBtn").classList.toggle("hid",all.length===0);
+  $("saveBtnP").classList.toggle("hid",sc===0);
+  $("clearBtnP").classList.toggle("hid",sc===0);
+  $("npCard").classList.toggle("hid",all.length<2);
+  $("genArea").classList.toggle("hid",sc<3);
+  $("refDiagram").classList.toggle("hid",all.length>0);
+  if(unsorted.length>0){
+    $("unsortedWarn").classList.remove("hid");
+    $("unsortedWarn").textContent=unsorted.length+" student"+(unsorted.length!==1?"s":"")+" still unsorted — they won't be placed";
+  }else{
+    $("unsortedWarn").classList.add("hid");
+  }
+  $("sortCount").textContent=all.length>0?sc+"/"+all.length+" sorted":"";
+  // Update tab label
+  $("tabPods").textContent=pods.length?"Pods ("+pods.length+")":"Pods";
+}
+
+function updateCounts(){
+  for(var q=1;q<=4;q++){
+    $("bc"+q).textContent=quartiles[q].length;
+    $("be"+q).classList.toggle("hid",quartiles[q].length>0);
+  }
+  $("poolCount").textContent=unsorted.length;
+  $("poolArea").classList.toggle("hid",unsorted.length===0);
+}
+
+// Create a draggable chip
+function makeChip(name,q){
+  var d=document.createElement("div");
+  d.className="chip"+(q?" cq"+q:"");
+  d.draggable=true;
+  d.textContent=name;
+  if(q){
+    var s=document.createElement("span");s.className="ql";s.textContent=Q_SHORT[q];d.appendChild(s);
+  }
+  d.addEventListener("dragstart",function(e){
+    e.dataTransfer.setData("text/plain",JSON.stringify({name:name,fromQ:q||0}));
+    d.classList.add("dragging");
+  });
+  d.addEventListener("dragend",function(){d.classList.remove("dragging")});
+  return d;
+}
+
+function renderPool(){
+  var el=$("poolNames");el.innerHTML="";
+  unsorted.forEach(function(n){el.appendChild(makeChip(n,0))});
+}
+
+function renderBuckets(){
+  for(var q=1;q<=4;q++){
+    var el=$("bn"+q);el.innerHTML="";
+    quartiles[q].forEach(function(n){el.appendChild(makeChip(n,q))});
+  }
+}
+
+// Drop handlers for buckets
+function setupDropZone(el,targetQ){
+  el.addEventListener("dragover",function(e){e.preventDefault();el.classList.add("over")});
+  el.addEventListener("dragleave",function(){el.classList.remove("over")});
+  el.addEventListener("drop",function(e){
+    e.preventDefault();el.classList.remove("over");
+    try{
+      var d=JSON.parse(e.dataTransfer.getData("text/plain"));
+      moveName(d.name,d.fromQ,targetQ);
+    }catch(ex){}
+  });
+}
+
+// Setup drop zones
+document.querySelectorAll(".bucket").forEach(function(b){
+  setupDropZone(b,parseInt(b.getAttribute("data-q")));
+});
+// Pool drop zone
+(function(){
+  var pool=$("poolArea");
+  pool.addEventListener("dragover",function(e){e.preventDefault();pool.style.borderColor="rgba(193,20,48,.3)"});
+  pool.addEventListener("dragleave",function(){pool.style.borderColor=""});
+  pool.addEventListener("drop",function(e){
+    e.preventDefault();pool.style.borderColor="";
+    try{
+      var d=JSON.parse(e.dataTransfer.getData("text/plain"));
+      moveName(d.name,d.fromQ,0);
+    }catch(ex){}
+  });
+})();
+
+function moveName(name,fromQ,toQ){
+  if(fromQ===toQ)return;
+  // Remove from source
+  if(fromQ===0){unsorted=unsorted.filter(function(n){return n!==name})}
+  else{quartiles[fromQ]=quartiles[fromQ].filter(function(n){return n!==name})}
+  // Add to target
+  if(toQ===0){unsorted.push(name)}
+  else{quartiles[toQ].push(name)}
+  renderAll();
+}
+
+// Load names
+$("loadBtn").addEventListener("click",function(){
+  var names=$("inp").value.split(/[\n,]+/).map(function(s){return s.trim()}).filter(Boolean);
+  if(!names.length)return;
+  var existing={};allStudents().forEach(function(n){existing[n]=1});
+  var fresh=names.filter(function(n){return!existing[n]});
+  unsorted=unsorted.concat(fresh);
+  toast(fresh.length+" name"+(fresh.length!==1?"s":"")+" added");
+  renderAll();
+});
+
+// Paste mode load
+$("pasteLoadBtn").addEventListener("click",function(){
+  var total=0;
+  for(var q=1;q<=4;q++){
+    var names=($("pq"+q).value||"").split(/[\n,]+/).map(function(s){return s.trim()}).filter(Boolean);
+    quartiles[q]=names;total+=names.length;
+  }
+  unsorted=[];
+  toast(total+" students loaded into quartiles");
+  renderAll();
+});
+
+// Save / Load / Delete classes
+$("saveBtn").addEventListener("click",saveClass);
+$("saveBtnP").addEventListener("click",saveClass);
+function saveClass(){
+  var n=prompt('Name this class (e.g. "Period 1"):');
+  if(!n||!n.trim())return;
+  var sv=getSv();sv[n.trim()]={quartiles:quartiles,unsorted:unsorted,neverPairs:neverPairs};
+  setSv(sv);toast('Saved "'+n.trim()+'"');renderSaved();
+}
+
+function renderSaved(){
+  var sv=getSv(),keys=Object.keys(sv);
+  $("svCard").style.display=keys.length?"block":"none";
+  var list=$("svList");list.innerHTML="";
+  keys.forEach(function(k){
+    var b=document.createElement("button");b.className="sv-btn";
+    b.innerHTML=k+' <span class="dx">✕</span>';
+    b.addEventListener("click",function(e){
+      if(e.target.classList.contains("dx")){
+        if(confirm('Delete "'+k+'"?')){var s=getSv();delete s[k];setSv(s);renderSaved()}return;
+      }
+      var cls=sv[k];
+      quartiles=cls.quartiles||{1:[],2:[],3:[],4:[]};
+      unsorted=cls.unsorted||[];
+      neverPairs=cls.neverPairs||[];
+      // Populate paste fields
+      for(var q=1;q<=4;q++)$("pq"+q).value=(cls.quartiles&&cls.quartiles[q]||[]).join("\n");
+      pods=[];toast('Loaded "'+k+'"');renderAll();
+    });
+    list.appendChild(b);
+  });
+}
+renderSaved();
+
+// Clear
+$("clearBtn").addEventListener("click",doClear);
+$("clearBtnP").addEventListener("click",doClear);
+function doClear(){
+  if(!confirm("Clear all students?"))return;
+  unsorted=[];quartiles={1:[],2:[],3:[],4:[]};pods=[];
+  for(var q=1;q<=4;q++)$("pq"+q).value="";
+  renderAll();
+}
+
+// Never-pair
+function renderNeverPair(){
+  // Populate selects
+  var all=allStudents().slice().sort();
+  var selA=$("npA"),selB=$("npB");
+  var curA=selA.value,curB=selB.value;
+  selA.innerHTML='<option value="">Student A…</option>';
+  selB.innerHTML='<option value="">Student B…</option>';
+  all.forEach(function(n){
+    var oA=document.createElement("option");oA.value=n;oA.textContent=n;selA.appendChild(oA);
+    var oB=document.createElement("option");oB.value=n;oB.textContent=n;selB.appendChild(oB);
+  });
+  selA.value=curA;selB.value=curB;
+
+  // Render tags
+  var list=$("npList");list.innerHTML="";
+  $("npEmpty").classList.toggle("hid",neverPairs.length>0);
+  neverPairs.forEach(function(pair,i){
+    var s=document.createElement("span");s.className="np-tag";s.style.marginRight="4px";s.style.marginBottom="4px";
+    s.innerHTML=pair[0]+" ≠ "+pair[1]+' <span class="x">✕</span>';
+    s.querySelector(".x").addEventListener("click",function(){neverPairs.splice(i,1);renderNeverPair()});
+    list.appendChild(s);
+  });
+}
+$("npAdd").addEventListener("click",function(){
+  var a=$("npA").value,b=$("npB").value;
+  if(!a||!b||a===b)return;
+  var exists=neverPairs.some(function(p){return(p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a)});
+  if(exists){toast("Rule already exists");return}
+  neverPairs.push([a,b]);$("npA").value="";$("npB").value="";
+  renderNeverPair();
+});
+
+// ============ POD ALGORITHM ============
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}
+  return a;
+}
+
+function buildPodsFn(){
+  var buckets=[shuffle(quartiles[1]),shuffle(quartiles[2]),shuffle(quartiles[3]),shuffle(quartiles[4])];
+  var minLen=Math.min(buckets[0].length,buckets[1].length,buckets[2].length,buckets[3].length);
+  var result=[];
+
+  for(var p=0;p<minLen;p++){
+    result.push([
+      {name:buckets[0][p],q:1},{name:buckets[1][p],q:2},
+      {name:buckets[2][p],q:3},{name:buckets[3][p],q:4}
+    ]);
+  }
+
+  var leftovers=[];
+  for(var q=0;q<4;q++){
+    for(var i=minLen;i<buckets[q].length;i++){
+      leftovers.push({name:buckets[q][i],q:q+1});
+    }
+  }
+
+  if(leftovers.length>=3){
+    var temp=[];
+    for(var i=0;i<leftovers.length;i++){
+      temp.push(leftovers[i]);
+      if(temp.length===3){result.push(temp.slice());temp=[]}
+    }
+    if(temp.length>0&&result.length>0){
+      for(var i=0;i<temp.length;i++){result[result.length-1-(i%result.length)].push(temp[i])}
+    }else if(temp.length>0){result.push(temp)}
+  }else if(leftovers.length>0&&result.length>0){
+    for(var i=0;i<leftovers.length;i++){result[i%result.length].push(leftovers[i])}
+  }
+
+  // Resolve never-pairs
+  if(neverPairs.length){
+    var improved=true,iter=0;
+    while(improved&&iter<50){
+      improved=false;iter++;
+      for(var np=0;np<neverPairs.length;np++){
+        var nA=neverPairs[np][0],nB=neverPairs[np][1];
+        var pA=-1,iA=-1,pB=-1,iB=-1;
+        for(var pi=0;pi<result.length;pi++){
+          for(var si=0;si<result[pi].length;si++){
+            if(result[pi][si].name===nA){pA=pi;iA=si}
+            if(result[pi][si].name===nB){pB=pi;iB=si}
+          }
+        }
+        if(pA>=0&&pB>=0&&pA===pB){
+          var student=result[pA][iA],swapped=false;
+          for(var pi=0;pi<result.length&&!swapped;pi++){
+            if(pi===pA)continue;
+            for(var si=0;si<result[pi].length&&!swapped;si++){
+              if(result[pi][si].q===student.q){
+                var cand=result[pi][si],conflict=false;
+                for(var c=0;c<neverPairs.length;c++){
+                  var ca=neverPairs[c][0],cb=neverPairs[c][1];
+                  for(var k=0;k<result[pA].length;k++){
+                    if(k===iA)continue;
+                    if((ca===cand.name&&cb===result[pA][k].name)||(cb===cand.name&&ca===result[pA][k].name)){conflict=true;break}
+                  }
+                  if(conflict)break;
+                }
+                if(!conflict){
+                  var tmp=result[pA][iA];result[pA][iA]=result[pi][si];result[pi][si]=tmp;
+                  swapped=true;improved=true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+// Generate
+$("genBtn").addEventListener("click",function(){
+  if(sortedCount()<3){toast("Need at least 3 students in quartiles");return}
+  pods=buildPodsFn();locked={};switchView("pods");
+});
+$("reshuffleBtn").addEventListener("click",function(){
+  pods=buildPodsFn();locked={};renderPods();
+});
+
+// Copy
+$("copyBtn").addEventListener("click",function(){
+  if(!pods.length)return;
+  var lines=pods.map(function(pod,i){
+    return"Pod "+(i+1)+": "+pod.map(function(s){return s.name+" ("+Q_SHORT[s.q]+")"}).join(", ");
+  });
+  copyText(lines.join("\n"));
+});
+
+// Render pods
+function renderPods(){
+  var grid=$("podGrid");grid.innerHTML="";
+  if(!pods.length){
+    $("emptyPods").classList.remove("hid");$("podGrid").classList.add("hid");
+    $("legend").classList.add("hid");$("podSummary").textContent="";
+    $("reshuffleBtn").classList.add("hid");$("copyBtn").classList.add("hid");$("backBtn").style.marginLeft="0";
+    return;
+  }
+  $("emptyPods").classList.add("hid");$("podGrid").classList.remove("hid");
+  $("legend").classList.remove("hid");
+  $("reshuffleBtn").classList.remove("hid");$("copyBtn").classList.remove("hid");
+
+  pods.forEach(function(pod,pi){
+    var is3=pod.length<=3;
+    // Check violations
+    var violations={};
+    neverPairs.forEach(function(pair){
+      var hasA=pod.some(function(s){return s.name===pair[0]});
+      var hasB=pod.some(function(s){return s.name===pair[1]});
+      if(hasA&&hasB){violations[pair[0]]=1;violations[pair[1]]=1}
+    });
+    var hasV=Object.keys(violations).length>0;
+
+    var div=document.createElement("div");
+    div.className="pod"+(hasV?" conflict":"");
+
+    // Header
+    var hdr='<div class="pod-hdr"><span class="label">Pod '+(pi+1)+'</span><div>';
+    if(hasV)hdr+='<span class="pod-badge" style="background:rgba(255,80,80,.12);color:#f55;margin-right:4px">⚠ CONFLICT</span>';
+    if(is3)hdr+='<span class="pod-badge" style="background:rgba(255,255,255,.04);color:#666">Pod of 3</span>';
+    hdr+='</div></div>';
+
+    var html=hdr;
+    html+='<div class="pod-dir" style="margin-bottom:6px">↑ far from teacher</div>';
+
+    if(is3){
+      html+='<div class="pod-row">'+seatHtml(pod[0],violations)+'</div>';
+      html+='<div style="text-align:center;font-size:8px;color:#444;margin:2px 0">↙ face ↘</div>';
+      html+='<div class="pod-row">'+seatHtml(pod[1],violations)+'<div class="pod-mid">↔</div>'+seatHtml(pod[2],violations)+'</div>';
+    }else{
+      html+='<div class="pod-row">'+seatHtml(pod[0],violations)+'<div class="pod-mid">↔ face</div>'+seatHtml(pod[1],violations)+'</div>';
+      html+='<div class="pod-shoulder"><span>↕ shoulder</span><span>↕ shoulder</span></div>';
+      html+='<div class="pod-row">'+seatHtml(pod[2],violations)+'<div class="pod-mid">↔ face</div>'+seatHtml(pod[3],violations)+'</div>';
+      if(pod.length>4){
+        html+='<div class="pod-row" style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.06)">';
+        for(var e=4;e<pod.length;e++)html+=seatHtml(pod[e],violations);
+        html+='</div>';
+      }
+    }
+
+    html+='<div class="pod-dir" style="margin-top:6px">↓ near teacher</div>';
+    div.innerHTML=html;
+
+    // Attach click handlers for locking
+    div.querySelectorAll(".seat").forEach(function(seat){
+      seat.addEventListener("click",function(){
+        var nm=seat.getAttribute("data-name");
+        if(locked[nm]){delete locked[nm]}else{locked[nm]=1}
+        seat.classList.toggle("locked",!!locked[nm]);
+        var lockEl=seat.querySelector(".lock");
+        if(locked[nm]){
+          if(!lockEl){lockEl=document.createElement("span");lockEl.className="lock";lockEl.textContent="🔒";seat.appendChild(lockEl)}
+        }else{if(lockEl)lockEl.remove()}
+      });
+    });
+
+    grid.appendChild(div);
+  });
+
+  // Summary
+  var total=0,of4=0,of3=0;
+  pods.forEach(function(p){total+=p.length;if(p.length===4)of4++;else if(p.length===3)of3++});
+  var sum=total+" students · "+of4+" pod"+(of4!==1?"s":"")+" of 4";
+  if(of3>0)sum+=" · "+of3+" pod"+(of3!==1?"s":"")+" of 3";
+  $("podSummary").textContent=sum;
+}
+
+function seatHtml(s,violations){
+  if(!s)return'<div style="width:110px;height:50px"></div>';
+  var isLocked=!!locked[s.name];
+  var isViolation=!!violations[s.name];
+  var cls="seat"+(isLocked?" locked":"")+(isViolation?" violation":"");
+  var html='<div class="'+cls+'" data-name="'+s.name+'">';
+  if(isLocked)html+='<span class="lock">🔒</span>';
+  html+='<div class="nm">'+s.name+'</div>';
+  html+='<div class="qt">'+Q_SHORT[s.q]+'</div>';
+  html+='</div>';
+  return html;
+}
+
+// Initial render
+renderAll();
+
+})();
+</script>
+</body>
+</html>
