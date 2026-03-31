@@ -2,7 +2,7 @@
 
 A Kagan-style heterogeneous grouping tool for Regis Jesuit High School teachers — sort students into quartiles, generate pods with shoulder partners two tiers apart, and reshuffle anytime.
 
-**[Launch Raider Pod Generator →](#)**
+**[Launch Raider Pod Generator →](https://rjedtech.github.io/Raider-Pods)**
 
 ## How It Works
 
