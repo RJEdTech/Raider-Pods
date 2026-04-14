@@ -162,6 +162,12 @@ body.light .cq1{background:rgba(193,20,48,.05);border-color:rgba(193,20,48,.12)}
 body.light .cq2{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
 body.light .cq3{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06)}
 body.light .cq4{background:rgba(0,0,0,.01);border-color:rgba(0,0,0,.05)}
+body.light #kaganBody{color:#444!important}
+body.light #kaganBody strong{color:#333!important}
+body.light #kaganBody em{color:#444!important}
+body.light #kaganBody div{color:#555!important}
+body.light #kaganBody .seat-q-label{color:#333!important}
+body.light #kaganArrow{color:#999}
 </style>
 </head>
 <body>
@@ -262,26 +268,102 @@ body.light .cq4{background:rgba(0,0,0,.01);border-color:rgba(0,0,0,.05)}
       <div id="unsortedWarn" class="hid" style="font-size:11px;color:#888;margin-top:6px"></div>
     </div>
 
-    <!-- Reference Diagram -->
-    <div class="card ref" id="refDiagram" style="margin-top:16px">
-      <div style="font-size:12px;font-weight:700;color:#aaa;margin-bottom:8px">How Kagan Pod Seating Works</div>
-      <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div><div class="ref-title">Pod of 4 (default):</div><pre>┌──────────┬──────────┐
-│ Q1  Top  │ Q2  2nd  │ ← Far
-│  25%     │  25%     │
-├─shoulder──┼─shoulder──┤
-│ Q3  3rd  │ Q4  Low  │ ← Near
-│  25%     │  25%     │
-└──────────┴──────────┘
-Shoulder: Q1↕Q3, Q2↕Q4 (2 apart)
-Face:     Q1↔Q2, Q3↔Q4 (1 apart)</pre></div>
-        <div><div class="ref-title">Pod of 3 (remainder):</div><pre>     ┌─────────┐
-     │ Q1 Top  │ ← Far
-     │         │
-  ┌──┴────┬────┴──┐
-  │ Q2 Mid│Q3 Low │ ← Near
-  │       │       │
-  └───────┴───────┘</pre></div>
+    <!-- Kagan Explainer (collapsible) -->
+    <div class="card" id="kaganExplainer" style="margin-top:16px">
+      <button id="kaganToggle" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:0;font-family:inherit">
+        <span style="font-size:12px;font-weight:700;color:#aaa">New to Kagan Pods? Learn how they work</span>
+        <span id="kaganArrow" style="font-size:14px;color:#666;transition:transform .2s">▸</span>
+      </button>
+      <div id="kaganBody" style="display:none;margin-top:14px">
+
+        <!-- WHY -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:#C11430;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Why heterogeneous pods?</div>
+          <div style="font-size:12px;color:#bbb;line-height:1.65">
+            In Kagan's cooperative learning model, students are grouped by performance into four quartiles — then <em>deliberately mixed</em> so that every pod contains one student from each quartile. This isn't random grouping. The seating is intentional: students who sit next to each other (shoulder partners) are always <strong style="color:#eee">two quartiles apart</strong>. That's the productive gap — close enough to communicate, far enough apart that the stronger student has to explain and the developing student gets a genuine thinking partner, not just an answer.
+          </div>
+        </div>
+
+        <!-- VISUAL: Pod of 4 -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Pod of 4 — the default layout</div>
+          <div style="max-width:340px;margin:0 auto">
+            <div style="text-align:center;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">↑ Far from teacher</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div style="background:rgba(193,20,48,.12);border:1px solid rgba(193,20,48,.25);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:13px;font-weight:700;color:#eee">Q1</div>
+                <div style="font-size:10px;color:#999">Top 25%</div>
+              </div>
+              <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:13px;font-weight:700;color:#eee">Q2</div>
+                <div style="font-size:10px;color:#999">50–75%</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;padding:3px 20px;font-size:9px;color:#555">
+              <span>↕ shoulder</span><span>↕ shoulder</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:13px;font-weight:700;color:#eee">Q3</div>
+                <div style="font-size:10px;color:#999">25–50%</div>
+              </div>
+              <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:13px;font-weight:700;color:#eee">Q4</div>
+                <div style="font-size:10px;color:#999">Bottom 25%</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-top:6px">↓ Near teacher</div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:#999;line-height:1.6">
+            <strong style="color:#ccc">Shoulder partners</strong> (Q1↕Q3 and Q2↕Q4) sit side-by-side — two quartiles apart. This is where the most productive peer interaction happens: the gap is wide enough to create a teaching moment, narrow enough that the conversation stays accessible.<br>
+            <strong style="color:#ccc">Face partners</strong> (Q1↔Q2 and Q3↔Q4) sit across from each other — one quartile apart. These are closer in level, which works well for compare-and-check activities.
+          </div>
+        </div>
+
+        <!-- VISUAL: Pod of 3 -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Pod of 3 — when the numbers don't divide evenly</div>
+          <div style="max-width:260px;margin:0 auto">
+            <div style="text-align:center;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">↑ Far from teacher</div>
+            <div style="display:flex;justify-content:center;margin-bottom:6px">
+              <div style="width:120px;background:rgba(193,20,48,.12);border:1px solid rgba(193,20,48,.25);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:13px;font-weight:700;color:#eee">Q1</div>
+                <div style="font-size:10px;color:#999">Top</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:13px;font-weight:700;color:#eee">Q2</div>
+                <div style="font-size:10px;color:#999">Mid</div>
+              </div>
+              <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-size:13px;font-weight:700;color:#eee">Q3</div>
+                <div style="font-size:10px;color:#999">Low</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-top:6px">↓ Near teacher</div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:#999;line-height:1.6">
+            When class size doesn't divide by four, the remainder students form pods of 3. The Q4 seat is dropped — Q1 stays farthest from the teacher, Q2 and Q3 sit nearest. The shoulder-partner principle still applies: Q1 is two levels above Q3.
+          </div>
+        </div>
+
+        <!-- HOW TO SORT -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:#C11430;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">How to sort students into quartiles</div>
+          <div style="font-size:12px;color:#bbb;line-height:1.65">
+            Rank your students by overall performance in your class — grades, assessments, your professional judgment, or some combination. Then divide that ranked list into four equal groups. The top 25% is Q1, the next 25% is Q2, the next is Q3, the bottom 25% is Q4. It doesn't need to be precise — reasonable judgment is the point, not statistical exactness. You can always move individual students between quartiles after the initial sort.
+          </div>
+        </div>
+
+        <!-- WHEN TO RESHUFFLE -->
+        <div style="margin-bottom:4px">
+          <div style="font-size:11px;font-weight:700;color:#C11430;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">When to reshuffle</div>
+          <div style="font-size:12px;color:#bbb;line-height:1.65">
+            Kagan recommends reshuffling pods every 5–6 weeks so students work with different peers throughout the semester. Your quartile assignments stay — only the pod combinations change. If a student's performance has shifted, move them to a different quartile before regenerating. The tool preserves your quartile sorts between sessions.
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -334,6 +416,13 @@ $("themeTgl").addEventListener("click",function(){
   isLight=!isLight;document.body.classList.toggle("light",isLight);
   $("themeTgl").textContent=isLight?"🌙 Dark Mode":"☀ Light Mode";
   try{localStorage.setItem("rr_pod_theme",isLight?"light":"dark")}catch(e){}
+});
+
+// Kagan explainer toggle
+$("kaganToggle").addEventListener("click",function(){
+  var body=$("kaganBody"),arrow=$("kaganArrow");
+  if(body.style.display==="none"){body.style.display="block";arrow.style.transform="rotate(90deg)"}
+  else{body.style.display="none";arrow.style.transform="rotate(0deg)"}
 });
 
 // View switching
