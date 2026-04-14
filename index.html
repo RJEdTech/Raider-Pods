@@ -473,7 +473,7 @@ function renderAll(){
   $("clearBtnP").classList.toggle("hid",sc===0);
   $("npCard").classList.toggle("hid",all.length<2);
   $("genArea").classList.toggle("hid",sc<3);
-  $("refDiagram").classList.toggle("hid",all.length>0);
+  $("kaganExplainer").classList.toggle("hid",all.length>0);
   if(unsorted.length>0){
     $("unsortedWarn").classList.remove("hid");
     $("unsortedWarn").textContent=unsorted.length+" student"+(unsorted.length!==1?"s":"")+" still unsorted — they won't be placed";
