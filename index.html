@@ -38,6 +38,10 @@ textarea::placeholder{color:#555}
 .mode-btn{padding:5px 14px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;background:rgba(255,255,255,.03);color:#888;border:1px solid transparent}
 .mode-btn.a{background:rgba(193,20,48,.12);color:#C11430;border-color:rgba(193,20,48,.3)}
 
+.rs-why{margin:2px 0 12px;padding:11px 13px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:11.5px;color:#9a9a9a;line-height:1.65;max-width:660px}
+.rs-why b{color:#ddd}
+body.light .rs-why{background:rgba(0,0,0,.025);border-color:rgba(0,0,0,.07);color:#5a5a5a}
+body.light .rs-why b{color:#222}
 /* Guided roster steps */
 .rs-hd{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
 .rs-lnk{color:#C11430;text-decoration:none;border-bottom:1px solid rgba(193,20,48,.35);font-weight:600}
@@ -318,9 +322,8 @@ body.light #kaganArrow{color:#999}
         <div class="rs-hd">
           <span class="rs-num">2</span>
           <div>
-            <div class="rs-t">Sort the class into four groups</div>
-            <div class="rs-s">Drag every name out of the Unsorted Pool into a group. Go by where each student is with <b>this material, right now</b> — recent work, a pre-assessment, your read of the room. It is a snapshot of one unit, not a label on a student, and you should expect it to look different next month. Anyone left in the pool is not placed in a pod.</div>
-          </div>
+            <div class="rs-t">Split the class into quarters by understanding of the material</div>
+            <div class="rs-s">Drag every name out of the Unsorted Pool. You want the <b>top quarter of the class in terms of how well they understand this material</b>, then the next quarter, then the next, then the last. Judge it however you normally would — grades, how they did on the last test or quiz, what they earned on recent assessments, a pre-assessment for the unit, or your own read of where they are. It does not have to be exact, and it describes this unit rather than the student. Anyone left in the pool does not get a seat in a pod.</div>
         </div>
 
         <!-- Unsorted Pool -->
@@ -334,10 +337,11 @@ body.light #kaganArrow{color:#999}
 
         <!-- Quartile Buckets -->
         <div id="buckets">
-          <div class="bucket bq1" data-q="1"><div class="bucket-label"><span>Group 1 · Running with it</span><span id="bc1" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn1"></div><div class="bucket-empty" id="be1">Drag students here</div></div>
-          <div class="bucket bq2" data-q="2"><div class="bucket-label"><span>Group 2 · Steady</span><span id="bc2" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn2"></div><div class="bucket-empty" id="be2">Drag students here</div></div>
-          <div class="bucket bq3" data-q="3"><div class="bucket-label"><span>Group 3 · Building</span><span id="bc3" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn3"></div><div class="bucket-empty" id="be3">Drag students here</div></div>
-          <div class="bucket bq4" data-q="4"><div class="bucket-label"><span>Group 4 · Just getting started</span><span id="bc4" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn4"></div><div class="bucket-empty" id="be4">Drag students here</div></div>
+          <div class="rs-why"><b>Why quarters?</b> Every pod takes one student from each quarter, so every pod holds four different levels of understanding instead of four students sitting in the same place. That is the whole point: a pod where everyone already understands it has nothing to explain, and a pod where nobody does has nobody to ask.<br><br><b>Why not sit Group 1 next to Group 4?</b> That gap is usually too wide — the explanation goes over the other student's head, and it turns into one doing the work while the other copies it down. So the tool seats <b>Group 1 beside Group 3, and Group 2 beside Group 4</b>: two steps apart. Far enough that one of them has something worth explaining, close enough that the explanation lands.<br><br><b>Worth knowing:</b> the mix only makes a good conversation <i>possible</i>. What actually raises achievement is the task you put on top of it — see <i>Why pods of four</i> below the buckets.</div>
+          <div class="bucket bq1" data-q="1"><div class="bucket-label"><span>Group 1 · Top 1/4 by understanding of the material</span><span id="bc1" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn1"></div><div class="bucket-empty" id="be1">Drag students here</div></div>
+          <div class="bucket bq2" data-q="2"><div class="bucket-label"><span>Group 2 · 2nd 1/4</span><span id="bc2" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn2"></div><div class="bucket-empty" id="be2">Drag students here</div></div>
+          <div class="bucket bq3" data-q="3"><div class="bucket-label"><span>Group 3 · 3rd 1/4</span><span id="bc3" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn3"></div><div class="bucket-empty" id="be3">Drag students here</div></div>
+          <div class="bucket bq4" data-q="4"><div class="bucket-label"><span>Group 4 · Last 1/4</span><span id="bc4" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn4"></div><div class="bucket-empty" id="be4">Drag students here</div></div>
         </div>
         </div>
       </div>
@@ -348,15 +352,15 @@ body.light #kaganArrow{color:#999}
         <div class="rs-hd">
           <span class="rs-num">2</span>
           <div>
-            <div class="rs-t">Sort the class into four groups</div>
-            <div class="rs-s">Paste a quarter of the class into each box, going by where each student is with <b>this material, right now</b>. It is a snapshot of one unit, not a label on a student.</div>
+            <div class="rs-t">Split the class into quarters by understanding of the material</div>
+            <div class="rs-s">Paste a quarter of the class into each box, working down from the students who <b>understand this material best</b> to the students furthest from it. Judge it however you normally would — grades, test and quiz scores, recent assessment results, a pre-assessment, or your own read of where they are.</div>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div><div class="sl" style="color:#C11430">Group 1 · Running with it</div><textarea id="pq1" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
-          <div><div class="sl">Group 2 · Steady</div><textarea id="pq2" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
-          <div><div class="sl">Group 3 · Building</div><textarea id="pq3" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
-          <div><div class="sl">Group 4 · Just getting started</div><textarea id="pq4" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+          <div><div class="sl" style="color:#C11430">Group 1 · Top 1/4 by understanding of the material</div><textarea id="pq1" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+          <div><div class="sl">Group 2 · 2nd 1/4</div><textarea id="pq2" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+          <div><div class="sl">Group 3 · 3rd 1/4</div><textarea id="pq3" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
+          <div><div class="sl">Group 4 · Last 1/4</div><textarea id="pq4" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
         </div>
         <div class="r" style="margin-top:8px">
           <button class="btn" id="pasteLoadBtn">Load into Groups</button>
@@ -429,7 +433,7 @@ body.light #kaganArrow{color:#999}
         <div style="margin-bottom:16px">
           <div style="font-size:11px;font-weight:700;color:#C11430;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Why a pod needs a range in it</div>
           <div style="font-size:12px;color:#bbb;line-height:1.65">
-            A pod where everyone is in the same place with the material has nobody to explain and nobody to ask. So the class is sorted into four groups, and each pod takes one student from each — every pod ends up with a range in it. The seating is deliberate rather than random: the two students <strong style="color:#eee">side by side are always two groups apart</strong>. That is the useful gap — far enough that one of them has to do the explaining, close enough that the other gets a real thinking partner instead of just an answer.
+            Four students who all understand the material have nothing to ask each other. Four who are all lost have nobody to ask. So the class is split into quarters by how well students understand the material, and every pod takes one student from each quarter — that is what guarantees the mix. The seating is deliberate rather than random: the two students <strong style="color:#eee">side by side are always two quarters apart</strong> — Group 1 beside Group 3, Group 2 beside Group 4. Putting Group 1 next to Group 4 sounds like the helpful thing to do, but that gap is usually too wide: the explanation lands over the other student's head and it becomes one student working while the other copies. Two steps apart is far enough that one of them has something worth explaining, close enough that it gets through.<br><br><strong style="color:#eee">If you just want groups, stop here.</strong> Generate the pods, read them off the board, and you are done — the rest of this is for teachers who want to seat the pods and use the partner pairs.
           </div>
         </div>
 
@@ -441,31 +445,33 @@ body.light #kaganArrow{color:#999}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
               <div style="background:rgba(193,20,48,.12);border:1px solid rgba(193,20,48,.25);border-radius:8px;padding:10px;text-align:center">
                 <div style="font-size:13px;font-weight:700;color:#eee">Group 1</div>
-                <div style="font-size:10px;color:#999">Running with it</div>
+                <div style="font-size:10px;color:#999">Already mastered it</div>
               </div>
               <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">
                 <div style="font-size:13px;font-weight:700;color:#eee">Group 2</div>
-                <div style="font-size:10px;color:#999">Steady</div>
+                <div style="font-size:10px;color:#999">Mostly there</div>
               </div>
             </div>
             <div style="display:flex;justify-content:space-around;padding:3px 20px;font-size:9px;color:#555">
-              <span>↕ side by side</span><span>↕ side by side</span>
+              <span>↕ shoulder</span><span>↕ shoulder</span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
               <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;text-align:center">
                 <div style="font-size:13px;font-weight:700;color:#eee">Group 3</div>
-                <div style="font-size:10px;color:#999">Building</div>
+                <div style="font-size:10px;color:#999">Partway there</div>
               </div>
               <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px;text-align:center">
                 <div style="font-size:13px;font-weight:700;color:#eee">Group 4</div>
-                <div style="font-size:10px;color:#999">Just getting started</div>
+                <div style="font-size:10px;color:#999">Just starting on it</div>
               </div>
             </div>
             <div style="text-align:center;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-top:6px">↓ Near teacher</div>
           </div>
           <div style="margin-top:10px;font-size:11px;color:#999;line-height:1.6">
-            <strong style="color:#ccc">Side-by-side partners</strong> (1↕3 and 2↕4) are two groups apart. This is where most of the useful talk happens: wide enough that one of them has something to explain, narrow enough that the conversation stays within reach of both.<br>
-            <strong style="color:#ccc">Across-the-table partners</strong> (1↔2 and 3↔4) are one group apart — closer together, which works well for compare-and-check.
+            <strong style="color:#ccc">Shoulder partners</strong> sit side by side — <strong style="color:#eee">Group 1 with Group 3, Group 2 with Group 4</strong>. Two quarters apart. This is the pair for most quick work: turn-and-talk, check my answer, explain your thinking, one problem each and then compare. The gap is deliberate — wide enough that one of them has something to teach, narrow enough that the teaching lands.<br>
+            <strong style="color:#ccc">Face partners</strong> sit across the table — <strong style="color:#eee">Group 1 with Group 2, Group 3 with Group 4</strong>. One quarter apart, so they are closer in understanding. Use this pair when you want two students moving at a similar pace: compare-and-check, split a reading and swap summaries, race the same problem set, peer-edit.<br><br>
+            <strong style="color:#ccc">How to actually use them.</strong> Say the pairing out loud and it becomes a routine: <em>"Shoulder partners, explain step three to each other"</em>, then <em>"Face partners, compare what you got."</em> One instruction moves the whole room and nobody negotiates who they are working with. Alternating between the two pairs also stops the same student doing all the explaining every time — which matters more than it sounds (see the research note below).<br><br>
+            For structures and activities built on these pairs, see the <a class="rs-lnk" href="https://rjedtech.github.io/cooperative-learning-toolkit/" target="_blank" rel="noopener">Cooperative Learning Toolkit</a>.
           </div>
         </div>
 
@@ -477,23 +483,23 @@ body.light #kaganArrow{color:#999}
             <div style="display:flex;justify-content:center;margin-bottom:6px">
               <div style="width:120px;background:rgba(193,20,48,.12);border:1px solid rgba(193,20,48,.25);border-radius:8px;padding:10px;text-align:center">
                 <div style="font-size:13px;font-weight:700;color:#eee">Group 1</div>
-                <div style="font-size:10px;color:#999">Running with it</div>
+                <div style="font-size:10px;color:#999">Already mastered it</div>
               </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
               <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px;text-align:center">
                 <div style="font-size:13px;font-weight:700;color:#eee">Group 2</div>
-                <div style="font-size:10px;color:#999">Steady</div>
+                <div style="font-size:10px;color:#999">Mostly there</div>
               </div>
               <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;text-align:center">
                 <div style="font-size:13px;font-weight:700;color:#eee">Group 3</div>
-                <div style="font-size:10px;color:#999">Building</div>
+                <div style="font-size:10px;color:#999">Partway there</div>
               </div>
             </div>
             <div style="text-align:center;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-top:6px">↓ Near teacher</div>
           </div>
           <div style="margin-top:10px;font-size:11px;color:#999;line-height:1.6">
-            When the class doesn't divide by four, the leftover students form pods of 3. The Group 4 seat is dropped — Group 1 stays farthest from the teacher, Groups 2 and 3 sit nearest. The side-by-side idea still holds: Group 1 and Group 3 are two groups apart.
+            When the class doesn't divide by four, the leftover students form pods of 3. The Group 4 seat is dropped — Group 1 stays farthest from the teacher, Groups 2 and 3 sit nearest. The shoulder-partner idea still holds: Group 1 and Group 3 are two quarters apart.
           </div>
         </div>
 
@@ -501,7 +507,24 @@ body.light #kaganArrow{color:#999}
         <div style="margin-bottom:16px">
           <div style="font-size:11px;font-weight:700;color:#C11430;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">How to sort your class</div>
           <div style="font-size:12px;color:#bbb;line-height:1.65">
-            Think about where each student is with <em>this</em> material right now — a pre-assessment, recent work, a quiz, your read of the room. Put the students already running with it in Group 1 and the students just getting started in Group 4, then split the rest between Groups 2 and 3, roughly a quarter of the class in each. It doesn't need to be precise; a reasonable read is the whole point. Drag anyone to a different group whenever your read changes.
+            Go by how much of <em>this</em> material each student has already mastered. Any evidence you already have works: their grade in your class, performance on tests and quizzes, what they earned on recent assessments, a pre-assessment for the unit, the last few assignments, or simply your read of where they are. The students who have it go in Group 1, the students just starting on it go in Group 4, and the rest split between Groups 2 and 3 — about a quarter of the class in each. It does not need to be precise; a reasonable read is the whole point. Drag anyone to a different group the moment your read changes.
+          </div>
+        </div>
+
+        <!-- RESEARCH -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:#C11430;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">What the research actually says</div>
+          <div style="font-size:12px;color:#bbb;line-height:1.65">
+            Worth being straight about this, because it changes how you use the tool. <strong style="color:#eee">Putting students in small groups, on its own, does very little.</strong> Across 145 studies the average achievement effect of small-group work over whole-class teaching was about <strong style="color:#eee">+0.17</strong>, and head-to-head comparisons of mixed-level against same-level grouping came out roughly even — in that same review, slightly in favour of same-level (+0.12). Hattie puts within-class grouping at d&nbsp;=&nbsp;0.18.<br><br>
+            What moves achievement is the <em>cooperative structure</em> laid on top of the grouping. Hattie reports d&nbsp;=&nbsp;0.55 for cooperative versus individualistic learning. Slavin's review is sharper: team learning where the group's success depends on <strong style="color:#eee">every individual member learning it</strong> has a median effect of +0.32, while informal group work with no such accountability sits at +0.07.<br><br>
+            The mechanism is explanation. Students who give and receive <strong style="color:#eee">elaborated explanations</strong> gain the most, and trading bare answers is <em>negatively</em> related to achievement gain. Mixing the quarters is what makes a real explanation possible — it does not cause one.<br><br>
+            <strong style="color:#eee">So the pods are the setup, not the intervention.</strong> Give each pod a goal it can only reach if every member learns the material, hold individuals accountable for their own understanding, and ask for reasoning rather than answers. One more finding worth planning around: Webb found that in mixed groups the higher-attaining students do most of the explaining — so the students who would gain most from explaining are the ones least likely to do it. Assign who explains rather than leaving it to the pod.
+          </div>
+          <div style="font-size:11px;color:#777;line-height:1.6;margin-top:8px">
+            <a class="rs-lnk" href="https://journals.sagepub.com/doi/10.3102/00346543066004423" target="_blank" rel="noopener">Lou et al., Within-Class Grouping: A Meta-Analysis (1996)</a> &middot;
+            <a class="rs-lnk" href="https://visible-learning.org/hattie-ranking-influences-effect-sizes-learning-achievement/" target="_blank" rel="noopener">Hattie, Visible Learning effect sizes</a> &middot;
+            <a class="rs-lnk" href="https://www.successforall.org/wp-content/uploads/2016/02/CL-What-Makes-Groupwork-work.pdf" target="_blank" rel="noopener">Slavin, What Makes Groupwork Work?</a> &middot;
+            <a class="rs-lnk" href="https://link.springer.com/chapter/10.1007/978-0-387-70892-8_11" target="_blank" rel="noopener">Webb, Explanation Giving and Receiving</a>
           </div>
         </div>
 
@@ -526,10 +549,10 @@ body.light #kaganArrow{color:#999}
       <button class="bo" id="backBtn">← Back to Setup</button>
     </div>
     <div class="legend" id="legend">
-      <span><span class="dot" style="background:rgba(193,20,48,.33)"></span>Group 1 · Running with it</span>
-      <span><span class="dot" style="background:rgba(255,255,255,.12)"></span>Group 2 · Steady</span>
-      <span><span class="dot" style="background:rgba(255,255,255,.08)"></span>Group 3 · Building</span>
-      <span><span class="dot" style="background:rgba(255,255,255,.06)"></span>Group 4 · Just getting started</span>
+      <span><span class="dot" style="background:rgba(193,20,48,.33)"></span>Group 1 · Top 1/4 by understanding of the material</span>
+      <span><span class="dot" style="background:rgba(255,255,255,.12)"></span>Group 2 · 2nd 1/4</span>
+      <span><span class="dot" style="background:rgba(255,255,255,.08)"></span>Group 3 · 3rd 1/4</span>
+      <span><span class="dot" style="background:rgba(255,255,255,.06)"></span>Group 4 · Last 1/4</span>
       <span style="color:#555">· Click to lock 🔒</span>
     </div>
     <div class="pod-grid" id="podGrid"></div>
@@ -1024,12 +1047,12 @@ function renderPods(){
 
     if(is3){
       html+='<div class="pod-row">'+seatHtml(pod[0],violations)+'</div>';
-      html+='<div style="text-align:center;font-size:8px;color:#444;margin:2px 0">↙ across ↘</div>';
+      html+='<div style="text-align:center;font-size:8px;color:#444;margin:2px 0">↙ face ↘</div>';
       html+='<div class="pod-row">'+seatHtml(pod[1],violations)+'<div class="pod-mid">↔</div>'+seatHtml(pod[2],violations)+'</div>';
     }else{
-      html+='<div class="pod-row">'+seatHtml(pod[0],violations)+'<div class="pod-mid">↔ across</div>'+seatHtml(pod[1],violations)+'</div>';
-      html+='<div class="pod-shoulder"><span>↕ side by side</span><span>↕ side by side</span></div>';
-      html+='<div class="pod-row">'+seatHtml(pod[2],violations)+'<div class="pod-mid">↔ across</div>'+seatHtml(pod[3],violations)+'</div>';
+      html+='<div class="pod-row">'+seatHtml(pod[0],violations)+'<div class="pod-mid">↔ face</div>'+seatHtml(pod[1],violations)+'</div>';
+      html+='<div class="pod-shoulder"><span>↕ shoulder</span><span>↕ shoulder</span></div>';
+      html+='<div class="pod-row">'+seatHtml(pod[2],violations)+'<div class="pod-mid">↔ face</div>'+seatHtml(pod[3],violations)+'</div>';
       if(pod.length>4){
         html+='<div class="pod-row" style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.06)">';
         for(var e=4;e<pod.length;e++)html+=seatHtml(pod[e],violations);
