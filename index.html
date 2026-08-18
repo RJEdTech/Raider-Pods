@@ -31,7 +31,11 @@ textarea::placeholder{color:#555}
 
 /* Tabs */
 .vtabs{display:flex;gap:4px;margin-bottom:12px;justify-content:center}
-.vtab{padding:6px 16px;border-radius:6px;border:1px solid transparent;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;background:rgba(255,255,255,.04);color:#888}
+.vtab{padding:7px 16px;border-radius:6px;border:1px solid transparent;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;background:rgba(255,255,255,.04);color:#888;line-height:1.3;text-align:center}
+.vtab .vsub{display:block;font-size:10px;font-weight:600;color:#777;margin-top:2px}
+.vtab.a .vsub{color:#C11430;opacity:.85}
+.vtab.empty{opacity:.55}
+body.light .vtab .vsub{color:#999}
 .vtab.a{background:rgba(193,20,48,.15);color:#C11430;border-color:rgba(193,20,48,.3)}
 
 /* Mode buttons */
@@ -297,8 +301,8 @@ body.light #kaganArrow{color:#999}
 
   <!-- View Tabs -->
   <div class="vtabs">
-    <button class="vtab a" id="tabSetup">Setup &amp; Sort</button>
-    <button class="vtab" id="tabPods">Pods</button>
+    <button class="vtab a" id="tabSetup">1 &middot; Setup &amp; Sort<span class="vsub">Paste your class, sort it into quarters</span></button>
+    <button class="vtab empty" id="tabPods" title="Your finished pods and seating chart appear here">2 &middot; Your Pods<span class="vsub" id="tabPodsSub">Nothing here yet</span></button>
   </div>
 
   <!-- ======== SETUP VIEW ======== -->
@@ -463,6 +467,7 @@ body.light #kaganArrow{color:#999}
     <!-- Generate -->
     <div class="hid" id="genArea" style="text-align:center;margin-top:16px">
       <button class="btn btn-lg" id="genBtn">Generate Pods</button>
+      <div style="font-size:11px;color:#888;margin-top:7px">Builds your pods and opens the seating chart</div>
       <div id="unsortedWarn" class="hid" style="font-size:11px;color:#888;margin-top:6px"></div>
     </div>
 
@@ -619,8 +624,9 @@ body.light #kaganArrow{color:#999}
       <a class="clt-btn" href="https://rjedtech.github.io/cooperative-learning-toolkit/" target="_blank" rel="noopener">Open the Cooperative Learning Toolkit &rarr;</a>
     </div>
     <div id="emptyPods" class="hid" style="text-align:center;padding:40px 0;color:#555">
-      <div style="font-size:14px;margin-bottom:8px">No pods generated yet</div>
-      <button class="btn" id="goSetupBtn">Go to Setup</button>
+      <div style="font-size:14px;color:#888;margin-bottom:6px">Your seating chart will appear here</div>
+      <div style="font-size:12px;color:#777;line-height:1.6;max-width:440px;margin:0 auto 14px">Nothing to show yet. Sort your class into the four groups on the Setup tab, then press <b style="color:#999">Generate Pods</b> — you will be brought straight here, and this is where you come back to reshuffle, copy the list, or check who is sitting with whom.</div>
+      <button class="btn" id="goSetupBtn">Back to Setup &amp; Sort</button>
     </div>
   </div>
 
@@ -719,7 +725,7 @@ function renderAll(){
   }
   $("sortCount").textContent=all.length>0?sc+"/"+all.length+" sorted":"";
   // Update tab label
-  $("tabPods").textContent=pods.length?"Pods ("+pods.length+")":"Pods";
+  updPodsTab();
 }
 
 function updateCounts(){
@@ -1071,15 +1077,23 @@ $("copyBtn").addEventListener("click",function(){
 });
 
 // Render pods
+function updPodsTab(){
+  var tp=$("tabPods"),tps=$("tabPodsSub");
+  if(tps)tps.textContent=pods.length?(pods.length+" pod"+(pods.length!==1?"s":"")+" \u00b7 seating chart"):"Nothing here yet";
+  if(tp)tp.classList.toggle("empty",!pods.length);
+}
 function renderPods(){
+  updPodsTab();
   var grid=$("podGrid");grid.innerHTML="";
   if(!pods.length){
     $("emptyPods").classList.remove("hid");$("podGrid").classList.add("hid");
+    var cc=document.querySelector(".clt-card");if(cc)cc.classList.add("hid");
     $("legend").classList.add("hid");$("podSummary").textContent="";
     $("reshuffleBtn").classList.add("hid");$("copyBtn").classList.add("hid");$("backBtn").style.marginLeft="0";
     return;
   }
   $("emptyPods").classList.add("hid");$("podGrid").classList.remove("hid");
+  var cc2=document.querySelector(".clt-card");if(cc2)cc2.classList.remove("hid");
   $("legend").classList.remove("hid");
   $("reshuffleBtn").classList.remove("hid");$("copyBtn").classList.remove("hid");
 
