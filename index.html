@@ -42,6 +42,34 @@ textarea::placeholder{color:#555}
 .rs-why b{color:#ddd}
 body.light .rs-why{background:rgba(0,0,0,.025);border-color:rgba(0,0,0,.07);color:#5a5a5a}
 body.light .rs-why b{color:#222}
+.pmap{margin:12px 0 4px;max-width:400px}
+.pmap-cap{text-align:center;font-size:9px;color:#666;text-transform:uppercase;letter-spacing:1.6px;margin:0 0 5px}
+.pmap-g{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:5px}
+.pmap-seat{border-radius:8px;padding:9px 6px;text-align:center;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
+.pmap-seat.q1{background:rgba(193,20,48,.13);border-color:rgba(193,20,48,.28)}
+.pmap-seat b{display:block;font-size:12px;font-weight:700;color:#eee;line-height:1.2}
+.pmap-seat span{display:block;font-size:9.5px;color:#8b8b8b;margin-top:2px}
+.pmap-lbl{font-size:9px;color:#C11430;font-weight:700;letter-spacing:.6px;white-space:nowrap;text-align:center}
+.pmap-row{display:grid;grid-template-columns:1fr auto 1fr;gap:5px;margin:4px 0}
+.pmap-row div{text-align:center}
+body.light .pmap-seat b{color:#1a1a1a}
+body.light .pmap-seat{border-color:rgba(0,0,0,.10);background:rgba(0,0,0,.025)}
+body.light .pmap-seat.q1{background:rgba(193,20,48,.09);border-color:rgba(193,20,48,.25)}
+body.light .pmap-cap{color:#999}
+.clt-card{margin-top:18px;padding:16px 18px;border-radius:12px;border:1px solid rgba(193,20,48,.30);background:linear-gradient(135deg,rgba(193,20,48,.10),rgba(193,20,48,.035))}
+.clt-eyebrow{font-size:10px;font-weight:700;color:#C11430;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px}
+.clt-h{font-size:15px;font-weight:700;color:#eee;line-height:1.35;margin-bottom:6px}
+.clt-p{font-size:12px;color:#9a9a9a;line-height:1.6;max-width:640px}
+.clt-p b{color:#ddd}
+.clt-btn{display:inline-block;margin-top:12px;padding:9px 20px;border-radius:8px;background:linear-gradient(135deg,#C11430,#D4243B);color:#fff;font-weight:700;font-size:12.5px;text-decoration:none}
+.clt-btn:hover{opacity:.9}
+.clt-list{margin-top:10px;font-size:11.5px;color:#8b8b8b;line-height:1.7}
+.clt-list b{color:#ccc}
+body.light .clt-h{color:#1a1a1a}
+body.light .clt-p{color:#5a5a5a}
+body.light .clt-p b{color:#222}
+body.light .clt-list{color:#666}
+body.light .clt-list b{color:#333}
 /* Guided roster steps */
 .rs-hd{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
 .rs-lnk{color:#C11430;text-decoration:none;border-bottom:1px solid rgba(193,20,48,.35);font-weight:600}
@@ -305,7 +333,7 @@ body.light #kaganArrow{color:#999}
         <button class="mode-btn a" id="modeDrag">Paste Names → Drag to Sort</button>
         <button class="mode-btn" id="modePaste">Paste Directly into Groups</button>
       </div>
-      <div class="rs-safe" style="margin-top:0;margin-bottom:12px"><b>Safe to paste.</b> Your roster never leaves this computer. There is no account, no upload, and no server — the names are stored only in this browser, and RJ Ed&nbsp;Tech never sees them. If you would rather not use full names, first name plus last initial works just as well.</div>
+      <div class="rs-safe" style="margin-top:0;margin-bottom:12px"><b>This protects student privacy.</b> Your roster <b>never leaves your computer</b>. There is no account, no upload, and no server to send it to — the names stay in this browser, on your machine. RJ Ed&nbsp;Tech never receives them, never stores them, and cannot see them. Because nothing is transmitted anywhere, pasting your class list here does not share student PII with anyone. If you would still rather not use full names, first name plus last initial works just as well.</div>
       </div>
 
       <!-- DRAG MODE -->
@@ -324,6 +352,7 @@ body.light #kaganArrow{color:#999}
           <div>
             <div class="rs-t">Split the class into quarters by how well they understand the material</div>
             <div class="rs-s">Put your class in order by <b>how well they understand this material</b>, then drag them across in four even chunks: the <b>top 25%</b> into Group 1, the next 25% into Group 2, the next into Group 3, the <b>bottom 25%</b> into Group 4. Judge it however you normally would — grades, the last test or quiz, recent assessment scores, a pre-assessment for the unit, or your own read of where they are. It does not have to be exact, and it describes this unit rather than the student. Anyone left in the pool does not get a seat in a pod.</div>
+          </div>
         </div>
 
         <!-- Unsorted Pool -->
@@ -337,7 +366,23 @@ body.light #kaganArrow{color:#999}
 
         <!-- Quartile Buckets -->
         <div id="buckets">
-          <div class="rs-why"><b>Why 25% each?</b> Every pod takes one student from each quarter, so every pod holds four different levels of understanding instead of four students sitting in the same place. That is the whole point: a pod where everyone already understands it has nothing to explain, and a pod where nobody does has nobody to ask.<br><br><b>Why not sit Group 1 next to Group 4?</b> That gap is usually too wide — the explanation goes over the other student's head and it turns into one doing the work while the other copies it down. So the seating caps it. <b>Shoulder partners</b> are Group 1 with Group 3 and Group 2 with Group 4 — two quarters apart. <b>Face partners</b> are Group 1 with Group 2 and Group 3 with Group 4 — one quarter apart, which puts the top half of the room together and the back half together. Group 1 and Group 4 never work together directly. Every pairing is close enough for an explanation to land; the structures you run on top are what turn that into talk.<br><br><b>Worth knowing:</b> the mix only makes a good conversation <i>possible</i>. What actually raises achievement is the task you put on top of it — see <i>Why pods of four</i> below the buckets.</div>
+          <div class="rs-why"><b>Why 25% each?</b> Every pod takes one student from each quarter, so every pod holds four different levels of understanding instead of four students sitting in the same place. A pod where everyone already understands it has nothing to explain; a pod where nobody does has nobody to ask.<br><br><b>Here is how a pod of four sits.</b> The students who need you most are nearest you, and the pairings fall out of the seating:
+          <div class="pmap">
+            <div class="pmap-cap">&uarr; Farthest from you</div>
+            <div class="pmap-g">
+              <div class="pmap-seat q1"><b>Group 1</b><span>Top 25%</span></div>
+              <div class="pmap-lbl">&harr; FACE &harr;</div>
+              <div class="pmap-seat"><b>Group 2</b><span>Upper middle 25%</span></div>
+            </div>
+            <div class="pmap-row"><div class="pmap-lbl">&updownarrow; SHOULDER</div><div></div><div class="pmap-lbl">&updownarrow; SHOULDER</div></div>
+            <div class="pmap-g">
+              <div class="pmap-seat"><b>Group 3</b><span>Lower middle 25%</span></div>
+              <div class="pmap-lbl">&harr; FACE &harr;</div>
+              <div class="pmap-seat"><b>Group 4</b><span>Bottom 25%</span></div>
+            </div>
+            <div class="pmap-cap" style="margin:5px 0 0">&darr; Nearest you</div>
+          </div>
+          <b>Face partners are one quarter apart</b> — Group 1 with Group 2, Group 3 with Group 4. That puts the top half of the room together and the back half together. <b>Shoulder partners are two quarters apart</b> — Group 1 with Group 3, Group 2 with Group 4, so the explaining travels further. <b>Group 1 and Group 4 never work together directly</b>, because that gap is usually too wide: the explanation goes over the other student's head and it turns into one doing the work while the other copies it down.<br><br>That cap is the whole design — every pairing is close enough that an explanation can land. But seating is only proximity. <b>What turns it into talk is the structure you run on top</b>, and that is what raises achievement — the <a class="rs-lnk" href="https://rjedtech.github.io/cooperative-learning-toolkit/" target="_blank" rel="noopener">Cooperative Learning Toolkit</a> has those, and <i>Why pods of four</i> below the buckets has the research.</div>
           <div class="bucket bq1" data-q="1"><div class="bucket-label"><span>Group 1 · Top 25%</span><span id="bc1" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn1"></div><div class="bucket-empty" id="be1">Drag students here</div></div>
           <div class="bucket bq2" data-q="2"><div class="bucket-label"><span>Group 2 · Upper middle 25%</span><span id="bc2" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn2"></div><div class="bucket-empty" id="be2">Drag students here</div></div>
           <div class="bucket bq3" data-q="3"><div class="bucket-label"><span>Group 3 · Lower middle 25%</span><span id="bc3" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn3"></div><div class="bucket-empty" id="be3">Drag students here</div></div>
@@ -502,7 +547,8 @@ body.light #kaganArrow{color:#999}
             <div style="text-align:center;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-top:6px">↓ Near teacher</div>
           </div>
           <div style="margin-top:10px;font-size:11px;color:#999;line-height:1.6">
-            When the class doesn't divide by four, the leftover students form pods of 3. The Group 4 seat is dropped — Group 1 stays farthest from the teacher, Groups 2 and 3 sit nearest. The pairings still hold: Group 1 is shoulder partners with Group 3, and Groups 2 and 3 face each other.
+            When the class doesn't divide by four, whoever is left over forms pods of 3. One student sits farthest from you and the other two sit nearest, so a pod of 3 has one face pair on each side and a shoulder pair across the bottom. In practice, three students are close enough that everyone works with everyone — you can call a pair by name or just say "in your pod of three."<br><br>
+            One thing to know: leftovers are taken from whichever groups still have students in them, so a pod of 3 will not always hold three different quarters the way a pod of 4 always does. Glance at the badges before you set a task on it, and drag names between groups if you want a different mix.
           </div>
         </div>
 
@@ -560,6 +606,18 @@ body.light #kaganArrow{color:#999}
     </div>
     <div class="pod-grid" id="podGrid"></div>
     <div class="summary" id="podSummary"></div>
+    <div class="clt-card">
+      <div class="clt-eyebrow">You have your pods — now make the explaining happen</div>
+      <div class="clt-h">Cooperative Learning Toolkit</div>
+      <div class="clt-p">Seating students together does not make them explain anything — a <b>structure</b> does. That is the whole finding: groups only outperform when the task makes every student accountable for their own understanding, and when students trade <b>reasoning</b> rather than answers. The Toolkit is where those structures live.</div>
+      <div class="clt-list">
+        <b>Library</b> — collaborative structures you can run tomorrow, each with the pairing it needs<br>
+        <b>Activity Designer</b> — build the task so every pod member has to learn it, not just finish it<br>
+        <b>Question Designer</b> — the prompt you put in front of a face or shoulder pair<br>
+        <b>Activity Architect</b> — an AI planning assistant for the whole lesson
+      </div>
+      <a class="clt-btn" href="https://rjedtech.github.io/cooperative-learning-toolkit/" target="_blank" rel="noopener">Open the Cooperative Learning Toolkit &rarr;</a>
+    </div>
     <div id="emptyPods" class="hid" style="text-align:center;padding:40px 0;color:#555">
       <div style="font-size:14px;margin-bottom:8px">No pods generated yet</div>
       <button class="btn" id="goSetupBtn">Go to Setup</button>
@@ -1051,7 +1109,7 @@ function renderPods(){
     if(is3){
       html+='<div class="pod-row">'+seatHtml(pod[0],violations)+'</div>';
       html+='<div style="text-align:center;font-size:8px;color:#444;margin:2px 0">↙ face ↘</div>';
-      html+='<div class="pod-row">'+seatHtml(pod[1],violations)+'<div class="pod-mid">↔</div>'+seatHtml(pod[2],violations)+'</div>';
+      html+='<div class="pod-row">'+seatHtml(pod[1],violations)+'<div class="pod-mid">↔ shoulder</div>'+seatHtml(pod[2],violations)+'</div>';
     }else{
       html+='<div class="pod-row">'+seatHtml(pod[0],violations)+'<div class="pod-mid">↔ face</div>'+seatHtml(pod[1],violations)+'</div>';
       html+='<div class="pod-shoulder"><span>↕ shoulder</span><span>↕ shoulder</span></div>';
