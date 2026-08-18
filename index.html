@@ -38,6 +38,38 @@ textarea::placeholder{color:#555}
 .mode-btn{padding:5px 14px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;background:rgba(255,255,255,.03);color:#888;border:1px solid transparent}
 .mode-btn.a{background:rgba(193,20,48,.12);color:#C11430;border-color:rgba(193,20,48,.3)}
 
+/* Guided roster steps */
+.rs-hd{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.rs-blk{padding-left:33px}
+.rs-blk>.rs-hd{margin-left:-33px}
+@media(max-width:560px){.rs-blk{padding-left:0}.rs-blk>.rs-hd{margin-left:0}}
+.rs-num{flex:0 0 auto;width:23px;height:23px;border-radius:50%;background:rgba(193,20,48,.14);border:1px solid rgba(193,20,48,.32);color:#C11430;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;margin-top:1px}
+.rs-t{font-size:13.5px;font-weight:700;color:#eee;line-height:1.3}
+.rs-s{font-size:11.5px;color:#8b8b8b;line-height:1.55;margin-top:3px;max-width:640px}
+.rs-s b{color:#bbb}
+.rs-safe{margin-top:9px;padding:9px 12px;border-left:2px solid rgba(193,20,48,.45);background:rgba(193,20,48,.05);border-radius:0 6px 6px 0;font-size:11.5px;color:#9a9a9a;line-height:1.6;max-width:660px}
+.rs-safe b{color:#ddd}
+.rs-svlbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#888;margin-bottom:6px}
+.rs-help{font-size:11.5px;color:#8b8b8b;line-height:1.55;max-width:640px}
+.rs-help b{color:#bbb}
+.rs-step{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07)}
+.rs-nudge{position:relative;margin-bottom:10px;padding:12px 34px 12px 14px;border-radius:10px;border:1px solid rgba(193,20,48,.30);background:linear-gradient(135deg,rgba(193,20,48,.11),rgba(193,20,48,.04))}
+.rs-nudge.ok{border-color:rgba(128,128,128,.28);background:rgba(128,128,128,.06)}
+.rs-nudge-t{font-size:12.5px;color:#ddd;line-height:1.45}
+.rs-nudge-t b{color:#fff}
+.rs-nudge-s{font-size:11.5px;color:#8b8b8b;line-height:1.5;margin-top:3px}
+.rs-nudge .btn{margin-top:10px}
+.rs-nudge-x{position:absolute;top:6px;right:7px;background:0 0;border:none;color:#888;cursor:pointer;font-size:12px;font-family:inherit;padding:4px 6px;line-height:1}
+.rs-nudge-x:hover{color:#C11430}
+body.light .rs-t{color:#1a1a1a}
+body.light .rs-s b{color:#444}
+body.light .rs-help b{color:#444}
+body.light .rs-safe{color:#5a5a5a;background:rgba(193,20,48,.045)}
+body.light .rs-safe b{color:#222}
+body.light .rs-nudge-t{color:#333}
+body.light .rs-nudge-t b{color:#111}
+body.light .rs-step{border-top-color:rgba(0,0,0,.08)}
+
 /* Saved class buttons */
 .sv-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#ccc;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600}
 .sv-btn:hover{background:rgba(255,255,255,.08)}
@@ -238,27 +270,54 @@ body.light #kaganArrow{color:#999}
   <!-- ======== SETUP VIEW ======== -->
   <div id="vSetup">
 
+    <div class="rs-nudge hid" id="saveNudge">
+      <button class="rs-nudge-x" id="nudgeX" type="button" aria-label="Dismiss">✕</button>
+      <div class="rs-nudge-t" id="nudgeT"></div>
+      <div class="rs-nudge-s" id="nudgeS"></div>
+      <button class="btn" id="nudgeSave" type="button">💾 Save this class</button>
+    </div>
+
     <!-- Saved Classes -->
     <div class="card" id="svCard" style="display:none">
-      <div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Saved Classes</div>
+      <div class="rs-svlbl">Your saved classes — click to load, ✕ to delete</div>
       <div class="r" id="svList" style="gap:5px"></div>
+      <div class="rs-help" style="margin-top:7px">Loading a saved class brings back its quartiles, its unsorted names, and its never-pair rules exactly as you left them.</div>
     </div>
 
     <!-- Input Mode -->
     <div class="card">
+      <div class="rs-blk">
+      <div class="rs-hd">
+        <span class="rs-num">1</span>
+        <div>
+          <div class="rs-t">Paste your class list</div>
+          <div class="rs-s">One name per line, or separated by commas. Copy straight out of My&nbsp;RJ, a Canvas roster, or a spreadsheet column. Pick how you want to rank them: drag each name into a quartile, or paste four ready-made lists.</div>
+        </div>
+      </div>
       <div class="r" style="gap:4px;margin-bottom:10px">
         <button class="mode-btn a" id="modeDrag">Paste Names → Drag to Sort</button>
         <button class="mode-btn" id="modePaste">Paste Directly into Quartiles</button>
       </div>
+      <div class="rs-safe" style="margin-top:0;margin-bottom:12px"><b>Safe to paste.</b> Your roster never leaves this computer. There is no account, no upload, and no server — the names are stored only in this browser, and RJ Ed&nbsp;Tech never sees them. If you would rather not use full names, first name plus last initial works just as well.</div>
+      </div>
 
       <!-- DRAG MODE -->
       <div id="dragMode">
+        <div class="rs-blk">
         <textarea id="inp" placeholder="Paste student names — one per line or comma-separated"></textarea>
-        <div class="r" style="margin-top:8px;margin-bottom:12px">
+        <div class="r" style="margin-top:8px;margin-bottom:6px">
           <button class="btn" id="loadBtn">Load Names</button>
-          <button class="bo hid" id="saveBtn">Save as Class</button>
           <button class="bo hid" id="clearBtn">Clear All</button>
           <span id="sortCount" style="font-size:11px;color:#888;font-family:'IBM Plex Mono',monospace"></span>
+        </div>
+        </div>
+        <div class="rs-blk" style="margin-top:14px">
+        <div class="rs-hd">
+          <span class="rs-num">2</span>
+          <div>
+            <div class="rs-t">Rank them into quartiles</div>
+            <div class="rs-s">Drag every name out of the Unsorted Pool into a quartile. <b>Q1</b> is your strongest quarter, <b>Q4</b> the quarter that needs the most support. Nobody left in the pool gets placed in a pod.</div>
+          </div>
         </div>
 
         <!-- Unsorted Pool -->
@@ -277,10 +336,19 @@ body.light #kaganArrow{color:#999}
           <div class="bucket bq3" data-q="3"><div class="bucket-label"><span>Q3 · 25–50%</span><span id="bc3" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn3"></div><div class="bucket-empty" id="be3">Drag students here</div></div>
           <div class="bucket bq4" data-q="4"><div class="bucket-label"><span>Q4 · Bottom 25% (Lowest)</span><span id="bc4" style="font-family:'IBM Plex Mono',monospace;font-weight:400">0</span></div><div class="bucket-names" id="bn4"></div><div class="bucket-empty" id="be4">Drag students here</div></div>
         </div>
+        </div>
       </div>
 
       <!-- PASTE MODE -->
       <div id="pasteMode" class="hid">
+        <div class="rs-blk">
+        <div class="rs-hd">
+          <span class="rs-num">2</span>
+          <div>
+            <div class="rs-t">Rank them into quartiles</div>
+            <div class="rs-s">Paste each quarter of the class into its own box. <b>Q1</b> is your strongest quarter, <b>Q4</b> the quarter that needs the most support.</div>
+          </div>
+        </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <div><div class="sl" style="color:#C11430">Q1 · Top 25% (Highest)</div><textarea id="pq1" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
           <div><div class="sl">Q2 · 50–75%</div><textarea id="pq2" placeholder="Paste names — one per line or comma-separated" style="min-height:50px"></textarea></div>
@@ -289,9 +357,41 @@ body.light #kaganArrow{color:#999}
         </div>
         <div class="r" style="margin-top:8px">
           <button class="btn" id="pasteLoadBtn">Load into Quartiles</button>
-          <button class="bo hid" id="saveBtnP">Save as Class</button>
           <button class="bo hid" id="clearBtnP">Clear All</button>
         </div>
+        </div>
+      </div>
+
+      <!-- Step 3: save -->
+      <div class="rs-step rs-blk">
+        <div class="rs-hd">
+          <span class="rs-num">3</span>
+          <div>
+            <div class="rs-t">Save the class so you never rank it again</div>
+            <div class="rs-s">Ranking a class into quartiles is the slow part — do it once. Give the class a name like <b>Period 1</b> and it becomes a button at the top of this page that restores the quartiles, the unsorted names, and the never-pair rules in one click.</div>
+          </div>
+        </div>
+        <div class="r" style="margin-top:9px">
+          <button class="bo" id="saveBtn">💾 Save as Class</button>
+          <span class="rs-help" id="saveHint"></span>
+        </div>
+      </div>
+
+      <!-- Step 4: backup -->
+      <div class="rs-step rs-blk">
+        <div class="rs-hd">
+          <span class="rs-num">4</span>
+          <div>
+            <div class="rs-t">Back it up — or move it to another computer</div>
+            <div class="rs-s">Download one small file that holds every saved class. Keep it in OneDrive, or restore it on your laptop, your classroom computer, or a new browser to get all your rosters back in one step.</div>
+          </div>
+        </div>
+        <div class="r" style="gap:6px;margin-top:9px">
+          <button class="bo" id="bkSave">⬇ Download backup</button>
+          <label class="bo" for="bkFile" id="bkRest">⬆ Restore from file</label>
+          <input type="file" id="bkFile" accept="application/json,.json" style="display:none">
+        </div>
+        <div class="rs-help" style="margin-top:7px">Saved classes live in this browser only. Clearing your browsing data, using a different computer, or switching browsers will lose them. A backup file takes two seconds and keeps them safe.</div>
       </div>
     </div>
 
@@ -419,6 +519,7 @@ body.light #kaganArrow{color:#999}
     <div class="r" style="justify-content:center;margin-bottom:12px">
       <button class="btn" id="reshuffleBtn">↻ Reshuffle</button>
       <button class="bo" id="copyBtn">📋 Copy Pods</button>
+      <button class="bo" id="podSaveBtn">💾 Save as Class</button>
       <button class="bo" id="backBtn">← Back to Setup</button>
     </div>
     <div class="legend" id="legend">
@@ -516,10 +617,10 @@ function renderAll(){
   updateCounts();
   var all=allStudents(),sc=sortedCount();
   // Show/hide elements
-  $("saveBtn").classList.toggle("hid",all.length===0);
   $("clearBtn").classList.toggle("hid",all.length===0);
-  $("saveBtnP").classList.toggle("hid",sc===0);
   $("clearBtnP").classList.toggle("hid",sc===0);
+  $("saveHint").textContent=all.length?(sc+" of "+all.length+" sorted into quartiles"):"Load a class list first \u2014 then this saves it.";
+  updSaveNudge();
   $("npCard").classList.toggle("hid",all.length<2);
   $("genArea").classList.toggle("hid",sc<3);
   $("kaganExplainer").classList.toggle("hid",all.length>0);
@@ -638,14 +739,81 @@ $("pasteLoadBtn").addEventListener("click",function(){
 });
 
 // Save / Load / Delete classes
-$("saveBtn").addEventListener("click",saveClass);
-$("saveBtnP").addEventListener("click",saveClass);
-function saveClass(){
-  var n=prompt('Name this class (e.g. "Period 1"):');
-  if(!n||!n.trim())return;
-  var sv=getSv();sv[n.trim()]={quartiles:quartiles,unsorted:unsorted,neverPairs:neverPairs};
-  setSv(sv);toast('Saved "'+n.trim()+'"');renderSaved();
+function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function rosterKey(a){return a.map(function(s){return String(s).toLowerCase().replace(/\s+/g," ").trim()}).sort().join("|")}
+function savedNameFor(a){
+  if(!a||!a.length)return null;
+  var sv=getSv(),k=rosterKey(a);
+  for(var n in sv){
+    var c=sv[n];if(!c)continue;
+    var q=c.quartiles||{},all=(c.unsorted||[]).concat(q[1]||[],q[2]||[],q[3]||[],q[4]||[]);
+    if(all.length&&rosterKey(all)===k)return n;
+  }
+  return null;
 }
+var nudgeOff=false;
+function updSaveNudge(){
+  var el=$("saveNudge");if(!el)return;
+  var all=allStudents();
+  if(!all.length||nudgeOff){el.classList.add("hid");return}
+  var m=savedNameFor(all);
+  el.classList.remove("hid");
+  if(m){
+    el.classList.add("ok");
+    $("nudgeT").innerHTML="\u2713 <b>"+all.length+" students</b> loaded from your saved class <b>"+esc(m)+"</b>.";
+    $("nudgeS").textContent="Quartiles and never-pair rules came back with it. Re-save after any change, and use Download backup below to keep a copy off this computer.";
+    $("nudgeSave").classList.add("hid");
+  }else{
+    el.classList.remove("ok");
+    $("nudgeT").innerHTML="<b>"+all.length+" students</b> loaded \u2014 this class is not saved yet.";
+    $("nudgeS").textContent="Save it once and the quartiles you sort today come back with one click, every time you open the Pod Generator on this computer.";
+    $("nudgeSave").classList.remove("hid");
+  }
+}
+function saveClass(){
+  var all=allStudents();
+  if(!all.length){toast("Paste some names first");return}
+  var n=prompt('Name this class (e.g. "Period 1"):',savedNameFor(all)||"");
+  if(!n||!n.trim())return;
+  n=n.trim();
+  var sv=getSv();
+  if(sv[n]&&!confirm('"'+n+'" already exists. Replace it with these '+all.length+' students?'))return;
+  sv[n]={quartiles:quartiles,unsorted:unsorted,neverPairs:neverPairs};
+  setSv(sv);toast('Saved "'+n+'" \u2014 it is at the top of the page now');renderSaved();updSaveNudge();
+}
+$("saveBtn").addEventListener("click",saveClass);
+$("nudgeSave").addEventListener("click",saveClass);
+$("podSaveBtn").addEventListener("click",saveClass);
+$("nudgeX").addEventListener("click",function(){nudgeOff=true;$("saveNudge").classList.add("hid")});
+
+// Backup / restore
+var BKKEYS=["rr_pods_v3","rr_pod_theme"];
+function bkExport(){
+  var d={_app:"raider-pods",_v:1,_date:new Date().toISOString()};
+  BKKEYS.forEach(function(k){try{var v=localStorage.getItem(k);if(v!==null)d[k]=v}catch(e){}});
+  try{
+    var blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});
+    var url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="raider-pods-backup-"+(new Date().toISOString().slice(0,10))+".json";
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url)},1500);
+    toast("Backup downloaded");
+  }catch(e){toast("Could not create the backup file")}
+}
+function bkImport(file){
+  if(!file)return;
+  var r=new FileReader();
+  r.onload=function(){
+    var d=null;try{d=JSON.parse(r.result)}catch(e){}
+    if(!d||d._app!=="raider-pods"){toast("That is not a Raider Pods backup");return}
+    if(!confirm("Restore this backup? It replaces the saved classes in this browser."))return;
+    BKKEYS.forEach(function(k){if(typeof d[k]==="string"){try{localStorage.setItem(k,d[k])}catch(e){}}});
+    renderSaved();updSaveNudge();toast("Backup restored");
+  };
+  r.readAsText(file);
+}
+$("bkSave").addEventListener("click",bkExport);
+$("bkFile").addEventListener("change",function(){bkImport(this.files&&this.files[0]);this.value=""});
 
 function renderSaved(){
   var sv=getSv(),keys=Object.keys(sv);
