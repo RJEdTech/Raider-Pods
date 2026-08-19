@@ -148,6 +148,34 @@ select{padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15)
 .pod-shoulder{display:flex;justify-content:center;gap:70px;margin:2px 0}
 .pod-shoulder span{font-size:8px;color:#444}
 
+.hdr-pill{padding:6px 12px;border-radius:6px;border:1px solid rgba(128,128,128,.3);background:transparent;color:inherit;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;margin-right:6px}
+.hdr-pill:hover{border-color:#C11430;color:#C11430}
+.hdr-pill.a{border-color:#C11430;color:#C11430;background:rgba(193,20,48,.08)}
+
+/* ===== Present mode — fullscreen for the projector ===== */
+body.fs{padding:8px;--pf:22px}
+body.fs .ctr{max-width:100%}
+body.fs .rj-tools,body.fs .site-footer,body.fs .clt-card,body.fs .vtabs{display:none!important}
+body.fs .pod-grid{grid-template-columns:repeat(auto-fill,minmax(calc(var(--pf)*var(--ptw,13)),1fr));gap:calc(var(--pf)*.5);margin-bottom:calc(var(--pf)*.4)}
+body.fs .pod{padding:calc(var(--pf)*.6);border-radius:calc(var(--pf)*.55)}
+body.fs .pod-hdr{margin-bottom:calc(var(--pf)*.42)}
+body.fs .pod-hdr .label{font-size:calc(var(--pf)*.5);letter-spacing:2px}
+body.fs .pod-badge{font-size:calc(var(--pf)*.42);padding:calc(var(--pf)*.1) calc(var(--pf)*.4);border-radius:calc(var(--pf)*.6)}
+body.fs .pod-dir,body.fs .pod-mid,body.fs .pod-shoulder span{font-size:calc(var(--pf)*.4)}
+body.fs .pod-row{gap:calc(var(--pf)*.4)}
+body.fs .pod-shoulder{gap:calc(var(--pf)*3.4)}
+body.fs .seat{width:calc(var(--pf)*var(--stw,6.4));padding:calc(var(--pf)*.34) calc(var(--pf)*.2);border-radius:calc(var(--pf)*.4)}
+body.fs .seat .nm{font-size:var(--pf)}
+body.fs .seat .qt{font-size:calc(var(--pf)*.5);margin-top:calc(var(--pf)*.06)}
+body.fs .seat .lock{font-size:calc(var(--pf)*.5);top:calc(var(--pf)*.1);right:calc(var(--pf)*.2)}
+body.fs .legend{font-size:calc(var(--pf)*.44);padding:calc(var(--pf)*.3) calc(var(--pf)*.6);margin-bottom:calc(var(--pf)*.5);gap:calc(var(--pf)*.55)}
+body.fs .legend .dot{width:calc(var(--pf)*.4);height:calc(var(--pf)*.4)}
+body.fs .summary{font-size:calc(var(--pf)*.48)}
+body.fs .watermark{opacity:.022!important}
+body.light.fs .watermark{opacity:.025!important}
+
+.rs-xblk{margin-top:12px;padding-top:11px;border-top:1px dashed rgba(128,128,128,.28)}
+
 /* Seats */
 .seat{width:110px;padding:6px 4px;border-radius:8px;cursor:pointer;text-align:center;transition:all .15s;position:relative;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .seat:hover{background:rgba(255,255,255,.06)}
@@ -292,6 +320,7 @@ body.light #kaganArrow{color:#999}
       </div>
     </div>
     <div class="hdr-tools">
+      <button class="hdr-pill" id="fsTgl" type="button" title="Present mode — fills the screen and blows the pods up for the projector">⛶ Fullscreen</button>
       <button class="icon-btn theme-toggle" id="themeTgl" type="button" aria-label="Toggle dark mode">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -320,6 +349,11 @@ body.light #kaganArrow{color:#999}
       <div class="rs-svlbl">Your saved classes — click to load, ✕ to delete</div>
       <div class="r" id="svList" style="gap:5px"></div>
       <div class="rs-help" style="margin-top:7px">Loading a saved class brings back its groups, its unsorted names, and its never-pair rules exactly as you left them.</div>
+      <div class="rs-xblk hid" id="xBlk">
+        <div class="rs-svlbl">Saved in the Raider Randomizer — click to bring that class here</div>
+        <div class="r" id="xList" style="gap:5px"></div>
+        <div class="rs-help" style="margin-top:6px">The Pod Generator and the <a href="https://rjedtech.github.io/Raider-Randomizer/" target="_blank" rel="noopener">Raider Randomizer</a> keep their classes in the same browser, so a roster you built there is available here. The names arrive unsorted, ready for step 1. Nothing is uploaded — this still never leaves your computer.</div>
+      </div>
     </div>
 
     <!-- Input Mode -->
@@ -661,6 +695,39 @@ $("themeTgl").addEventListener("click",function(){
   try{localStorage.setItem("rr_pod_theme",isLight?"light":"dark")}catch(e){}
 });
 
+// ===== Present mode =====
+var isFs=false,fitting=false,fitReq=0;
+function fitPods(){
+  var b=document.body;
+  if(!isFs||currentView!=="pods"){b.style.removeProperty("--pf");return}
+  var panel=$("vPods");
+  if(!panel||panel.classList.contains("hid"))return;
+  if(!panel.querySelector(".seat")){b.style.setProperty("--pf","24px");return}
+  var top=panel.getBoundingClientRect().top;
+  var avail=window.innerHeight-top-12;
+  if(avail<60)return;
+  var lo=11,hi=72,best=11;
+  for(var i=0;i<10;i++){
+    var mid=(lo+hi)/2;
+    b.style.setProperty("--pf",mid+"px");
+    if(panel.scrollHeight<=avail&&panel.scrollWidth<=panel.clientWidth+1){best=mid;lo=mid}else hi=mid;
+  }
+  b.style.setProperty("--pf",best+"px");
+}
+function refit(){if(fitting)return;fitting=true;try{fitPods()}finally{fitting=false}}
+function refitSoon(){if(fitReq)return;fitReq=requestAnimationFrame(function(){fitReq=0;refit()})}
+window.addEventListener("resize",refitSoon);
+$("fsTgl").addEventListener("click",function(){
+  isFs=!isFs;document.body.classList.toggle("fs",isFs);
+  $("hdr").classList.toggle("hid",isFs);
+  $("fsTgl").textContent=isFs?"⛶ Exit":"⛶ Fullscreen";$("fsTgl").classList.toggle("a",isFs);
+  if(!isFs)document.body.style.removeProperty("--pf");
+  if(isFs&&currentView!=="pods"&&pods.length)switchView("pods");
+  if(isFs&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(function(){});
+  else if(!isFs&&document.exitFullscreen)document.exitFullscreen().catch(function(){});
+  setTimeout(refit,60);setTimeout(refit,340);
+});
+
 // Kagan explainer toggle
 $("kaganToggle").addEventListener("click",function(){
   var body=$("kaganBody"),arrow=$("kaganArrow");
@@ -676,6 +743,7 @@ function switchView(v){
   $("tabSetup").classList.toggle("a",v==="setup");
   $("tabPods").classList.toggle("a",v==="pods");
   if(v==="pods") renderPods();
+  refitSoon();
 }
 $("tabSetup").addEventListener("click",function(){switchView("setup")});
 $("tabPods").addEventListener("click",function(){switchView("pods")});
@@ -908,9 +976,54 @@ function bkImport(file){
 $("bkSave").addEventListener("click",bkExport);
 $("bkFile").addEventListener("change",function(){bkImport(this.files&&this.files[0]);this.value=""});
 
+// Classes saved in the Raider Randomizer. Same origin (rjedtech.github.io), so the
+// two tools already share localStorage — no export file, nothing leaves the machine.
+function getRandomizerClasses(){
+  var out={};
+  try{
+    var raw=JSON.parse(localStorage.getItem("rs3_classes")||"{}");
+    Object.keys(raw).forEach(function(k){
+      var names=(raw[k]||[]).filter(function(n){return typeof n==="string"&&n.trim()});
+      if(names.length)out[k]=names;
+    });
+  }catch(e){}
+  return out;
+}
+function renderX(){
+  var blk=$("xBlk"),list=$("xList");if(!blk||!list)return;
+  var cl=getRandomizerClasses(),keys=Object.keys(cl),mine=getSv();
+  keys=keys.filter(function(k){
+    var c=mine[k];if(!c)return true;
+    var q=c.quartiles||{},all=(c.unsorted||[]).concat(q[1]||[],q[2]||[],q[3]||[],q[4]||[]);
+    return rosterKey(all)!==rosterKey(cl[k]);
+  });
+  list.innerHTML="";
+  if(!keys.length){blk.classList.add("hid");return false}
+  blk.classList.remove("hid");
+  keys.forEach(function(k){
+    var b=document.createElement("button");b.className="sv-btn";
+    b.textContent=k+" \u00b7 "+cl[k].length;
+    b.title='Load "'+k+'" ('+cl[k].length+" names) from the Raider Randomizer";
+    b.addEventListener("click",function(){
+      var existing={};allStudents().forEach(function(n){existing[n]=1});
+      var fresh=cl[k].filter(function(n){return !existing[n]});
+      unsorted=unsorted.concat(fresh);
+      switchMode("drag");
+      toast(fresh.length?('Brought '+fresh.length+' names over from the Randomizer'):"Those names are already here");
+      renderAll();
+    });
+    list.appendChild(b);
+  });
+  return true;
+}
 function renderSaved(){
   var sv=getSv(),keys=Object.keys(sv);
-  $("svCard").style.display=keys.length?"block":"none";
+  var hasX=renderX();
+  $("svCard").style.display=(keys.length||hasX)?"block":"none";
+  var ownLbl=$("svCard").querySelector(".rs-svlbl");
+  if(ownLbl)ownLbl.style.display=keys.length?"":"none";
+  var ownHelp=$("svCard").querySelector(".rs-help");
+  if(ownHelp)ownHelp.style.display=keys.length?"":"none";
   var list=$("svList");list.innerHTML="";
   keys.forEach(function(k){
     var b=document.createElement("button");b.className="sv-btn";
@@ -1085,6 +1198,10 @@ function updPodsTab(){
 function renderPods(){
   updPodsTab();
   var grid=$("podGrid");grid.innerHTML="";
+  var mx=0;pods.forEach(function(pd){pd.forEach(function(st){if(st&&st.name&&st.name.length>mx)mx=st.name.length})});
+  var stw=Math.max(5.2,mx*0.60+1.0);
+  grid.style.setProperty("--stw",stw.toFixed(2));
+  grid.style.setProperty("--ptw",(stw*2+3.2).toFixed(2));
   if(!pods.length){
     $("emptyPods").classList.remove("hid");$("podGrid").classList.add("hid");
     var cc=document.querySelector(".clt-card");if(cc)cc.classList.add("hid");
@@ -1174,6 +1291,11 @@ function seatHtml(s,violations){
   html+='</div>';
   return html;
 }
+
+try{
+  var _mo=new MutationObserver(function(){if(!fitting&&isFs)refitSoon()});
+  _mo.observe($("vPods"),{childList:true,subtree:true,characterData:true});
+}catch(e){}
 
 // Initial render
 renderAll();
