@@ -116,6 +116,17 @@ body.light .rs-step{border-top-color:rgba(0,0,0,.08)}
 .sv-btn:hover{background:rgba(255,255,255,.08)}
 .sv-btn .dx{margin-left:5px;color:#666;cursor:pointer}
 .sv-btn .dx:hover{color:#C11430}
+.sv-btn .ed{margin-left:6px;color:#7f7f7f;cursor:pointer;font-weight:400}
+.sv-btn .ed:hover{color:#C11430}
+.ed-bar{display:none;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:8px;background:rgba(193,20,48,.10);border:1px solid rgba(193,20,48,.35);margin:0 0 10px}
+.ed-bar.show{display:flex}
+.ed-bar .ed-t{font-size:12px;line-height:1.5;color:#ddd;flex:1;min-width:210px}
+.ed-bar .ed-t b{color:#ff6b81}
+.ed-bar .ed-note{display:block;margin-top:4px;color:#aaa;font-weight:400}
+body.light .ed-bar{background:rgba(193,20,48,.06);border-color:rgba(193,20,48,.28)}
+body.light .ed-bar .ed-t{color:#444}
+body.light .ed-bar .ed-t b{color:#C11430}
+body.light .ed-bar .ed-note{color:#666}
 
 /* Drop buckets */
 .bucket{padding:12px;border-radius:10px;min-height:52px;transition:all .15s;margin-bottom:8px}
@@ -396,8 +407,13 @@ body.light #kaganArrow{color:#999}
       <!-- DRAG MODE -->
       <div id="dragMode">
         <div class="rs-blk" id="step1Paste">
+        <div class="ed-bar" id="edBar">
+          <div class="ed-t" id="edT"></div>
+          <button class="btn" id="edSave">✓ Save changes</button>
+          <button class="bo" id="edCancel">Cancel</button>
+        </div>
         <textarea id="inp" placeholder="Paste student names — one per line or comma-separated"></textarea>
-        <div class="r" style="margin-top:8px;margin-bottom:6px">
+        <div class="r" id="loadRow" style="margin-top:8px;margin-bottom:6px">
           <button class="btn" id="loadBtn">Load Names</button>
           <button class="bo hid" id="clearBtn">Clear All</button>
           <span id="sortCount" style="font-size:11px;color:#888;font-family:'IBM Plex Mono',monospace"></span>
@@ -1134,6 +1150,81 @@ $("xSend").addEventListener("click",function(){
   toast("Opening the Randomizer with these "+all.length+" names\u2026");
   window.open("../Raider-Randomizer/#handoff","_blank","noopener");
 });
+// ===== Edit a saved class =====
+// Pods is not the Randomizer: a saved class here carries quartile assignments the
+// teacher spent real time on. So editing diffs the roster instead of replacing it —
+// names you delete come out of wherever they sit, names you add land in the Unsorted
+// Pool, and everybody else keeps the group they were sorted into.
+var editCls=null,editOrig="";
+function loadClassInto(k){
+  var cls=getSv()[k];if(!cls)return false;
+  quartiles=cls.quartiles||{1:[],2:[],3:[],4:[]};
+  for(var q=1;q<=4;q++)if(!quartiles[q])quartiles[q]=[];
+  unsorted=cls.unsorted||[];
+  neverPairs=cls.neverPairs||[];
+  for(var q2=1;q2<=4;q2++)$("pq"+q2).value=(quartiles[q2]||[]).join("\n");
+  pods=[];renderAll();
+  return true;
+}
+function lower(n){return String(n).toLowerCase().replace(/\s+/g," ").trim()}
+function startEdit(k){
+  var cls=getSv()[k];if(!cls)return;
+  if(savedNameFor(allStudents())!==k){
+    // Switching classes throws away sorting that was never saved. Say so first.
+    var cur=allStudents();
+    if(cur.length&&!savedNameFor(cur)&&
+       !confirm("The "+cur.length+" students on screen are not saved. Open \""+k+"\" for editing and lose that sorting?"))return;
+    loadClassInto(k);
+  }
+  editCls=k;editOrig=$("inp").value;
+  switchView("setup");switchMode("drag");
+  $("step1Done").setAttribute("data-open","1");updStep1();
+  $("inp").value=allStudents().join("\n");
+  var n=allStudents().length;
+  $("edT").innerHTML='\u270e Editing <b>'+esc(k)+'</b> \u2014 '+n+' students. Add a name on its own line, or delete a line you do not need, then press <b>Save changes</b>.'
+    +'<span class="ed-note">Anyone you add lands in the <b>Unsorted Pool</b> to be sorted. Everyone already sorted stays in the group you put them in.</span>';
+  $("edBar").classList.add("show");
+  if($("loadRow"))$("loadRow").classList.add("hid");
+  $("edBar").scrollIntoView({behavior:"smooth",block:"center"});
+  setTimeout(function(){var el=$("inp");el.focus();try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){}},380);
+}
+function endEdit(){
+  editCls=null;
+  $("edBar").classList.remove("show");
+  if($("loadRow"))$("loadRow").classList.remove("hid");
+}
+function saveEdit(){
+  if(!editCls)return;
+  var k=editCls,names=cleanRoster($("inp").value,nameMode).names;
+  if(!names.length){toast("Add at least one name, or press Cancel");return}
+  var keep={};names.forEach(function(n){keep[lower(n)]=1});
+  var before=allStudents(),wasN=before.length;
+  var gone={},nGone=0;
+  before.forEach(function(n){if(!keep[lower(n)]){gone[lower(n)]=1;nGone++}});
+  if(nGone){
+    unsorted=unsorted.filter(function(n){return !gone[lower(n)]});
+    for(var q=1;q<=4;q++)quartiles[q]=quartiles[q].filter(function(n){return !gone[lower(n)]});
+    neverPairs=neverPairs.filter(function(pr){return !gone[lower(pr[0])]&&!gone[lower(pr[1])]});
+    Object.keys(locked).forEach(function(n){if(gone[lower(n)])delete locked[n]});
+  }
+  var have={};allStudents().forEach(function(n){have[lower(n)]=1});
+  var added=names.filter(function(n){return !have[lower(n)]});
+  if(added.length)unsorted=unsorted.concat(added);
+  pods=[];
+  var sv=getSv();
+  sv[k]={quartiles:quartiles,unsorted:unsorted,neverPairs:neverPairs};
+  setSv(sv);
+  for(var q3=1;q3<=4;q3++)$("pq"+q3).value=(quartiles[q3]||[]).join("\n");
+  $("inp").value="";
+  endEdit();
+  $("step1Done").removeAttribute("data-open");
+  renderAll();renderSaved();
+  var bits=[];
+  if(added.length)bits.push("+"+added.length);
+  if(nGone)bits.push("\u2212"+nGone);
+  toast('"'+k+'" updated \u2014 '+allStudents().length+" students"+(bits.length?" ("+bits.join(", ")+")":""));
+  if(added.length)showPool();
+}
 function renderSaved(){
   var sv=getSv(),keys=Object.keys(sv);
   var hasX=renderX();
@@ -1145,23 +1236,24 @@ function renderSaved(){
   var list=$("svList");list.innerHTML="";
   keys.forEach(function(k){
     var b=document.createElement("button");b.className="sv-btn";
-    b.innerHTML=k+' <span class="dx">✕</span>';
+    b.title='Load "'+k+'" \u2014 or press the pencil to add or remove students';
+    var c0=sv[k]||{},q0=c0.quartiles||{},n0=(c0.unsorted||[]).length+(q0[1]||[]).length+(q0[2]||[]).length+(q0[3]||[]).length+(q0[4]||[]).length;
+    b.innerHTML=esc(k)+" \u00b7 "+n0+' <span class="ed" title="Edit this class \u2014 add or remove students">\u270e</span> <span class="dx" title="Delete">\u2715</span>';
     b.addEventListener("click",function(e){
+      if(e.target.classList.contains("ed")){startEdit(k);return}
       if(e.target.classList.contains("dx")){
-        if(confirm('Delete "'+k+'"?')){var s=getSv();delete s[k];setSv(s);renderSaved()}return;
+        if(confirm('Delete "'+k+'"?')){var s=getSv();delete s[k];setSv(s);if(editCls===k)endEdit();renderSaved()}return;
       }
-      var cls=sv[k];
-      quartiles=cls.quartiles||{1:[],2:[],3:[],4:[]};
-      unsorted=cls.unsorted||[];
-      neverPairs=cls.neverPairs||[];
-      // Populate paste fields
-      for(var q=1;q<=4;q++)$("pq"+q).value=(cls.quartiles&&cls.quartiles[q]||[]).join("\n");
-      pods=[];toast('Loaded "'+k+'"');renderAll();
+      endEdit();loadClassInto(k);toast('Loaded "'+k+'"');
     });
     list.appendChild(b);
   });
 }
 renderSaved();
+$("edSave").addEventListener("click",saveEdit);
+$("edCancel").addEventListener("click",function(){
+  $("inp").value=editOrig;endEdit();toast("Edit cancelled \u2014 nothing changed");
+});
 
 // Clear
 $("clearBtn").addEventListener("click",doClear);
