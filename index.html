@@ -386,7 +386,7 @@ body.light #kaganArrow{color:#999}
           <span class="rs-help" id="xSendNote" style="margin:0"></span>
         </div>
         <div class="hid" id="xPullRow">
-          <div class="rs-svlbl" style="margin-top:11px">Or bring one over — class lists saved in the Raider Randomizer:</div>
+          <div class="rs-svlbl" style="margin-top:11px">Or bring one over — class lists saved in the Raider Randomizer or Roster Hub:</div>
           <div class="r" id="xList" style="gap:5px"></div>
         </div>
         <div class="rs-help" style="margin-top:8px">Both tools keep their classes in the same browser, so a roster you build in one is available in the other. Names arriving here land unsorted, ready for step 1. Nothing is uploaded — this still never leaves your computer.</div>
@@ -1387,6 +1387,25 @@ $("bkFile").addEventListener("change",function(){bkImport(this.files&&this.files
 // Classes saved in the Raider Randomizer. Same origin (rjedtech.github.io), so the
 // two tools already share localStorage — no export file, nothing leaves the machine.
 function getRandomizerClasses(){
+  return addRosterHub(getRandOnly());
+}
+// Classes set up in Raider Roster Hub live on the same origin too.
+var XSRC={};
+function addRosterHub(out){
+  XSRC={};
+  try{
+    var raw=JSON.parse(localStorage.getItem("rj-roster-hub-v1")||"{}");
+    Object.keys(raw).sort(function(a,b){return a-b}).forEach(function(n){
+      var c=raw[n]||{},names=(c.roster||[]).map(function(r){return r&&r.name}).filter(function(x){return typeof x==="string"&&x.trim()});
+      if(!names.length)return;
+      var k=String(c.name||("Class "+n));
+      if(out[k])k+=" (Roster Hub)";
+      out[k]=names;XSRC[k]=1;
+    });
+  }catch(e){}
+  return out;
+}
+function getRandOnly(){
   var out={};
   try{
     var raw=JSON.parse(localStorage.getItem("rs3_classes")||"{}");
@@ -1417,15 +1436,15 @@ function renderX(){
   if(!keys.length)return canSend;
   keys.forEach(function(k){
     var b=document.createElement("button");b.className="sv-btn";
-    b.textContent=k+" \u00b7 "+cl[k].length;
-    b.title='Load "'+k+'" ('+cl[k].length+" names) from the Raider Randomizer";
+    b.textContent=k+" \u00b7 "+cl[k].length+(XSRC[k]?" \u00b7 Roster Hub":"");
+    b.title='Load "'+k+'" ('+cl[k].length+" names) from "+(XSRC[k]?"Roster Hub":"the Raider Randomizer");
     b.addEventListener("click",function(){
       var existing={};allStudents().forEach(function(n){existing[n]=1});
       var fresh=cl[k].filter(function(n){return !existing[n]});
       unsorted=unsorted.concat(fresh);
       switchMode("drag");
       $("step1Done").removeAttribute("data-open");
-      toast(fresh.length?('Brought '+fresh.length+' names over from the Randomizer'):"Those names are already here");
+      toast(fresh.length?('Brought '+fresh.length+' names over from '+(XSRC[k]?"Roster Hub":"the Randomizer")):"Those names are already here");
       renderAll();showPool();
     });
     list.appendChild(b);
@@ -1845,6 +1864,7 @@ renderAll();
     <a class="rj-tool" href="https://rjedtech.github.io/Raider-Randomizer/"><div class="rj-t">Raider Randomizer <span class="rj-arrow">&rarr;</span></div><div class="rj-d">Fair student picking, grouping, and seating shuffles.</div></a>
     <a class="rj-tool" href="https://rjedtech.github.io/Raider-Timer/"><div class="rj-t">Raider Timer <span class="rj-arrow">&rarr;</span></div><div class="rj-d">Countdown, stopwatch, and station rotation for class.</div></a>
     <div class="rj-tool is-here"><div class="rj-t">Raider Pod Generator<span class="rj-here">You&rsquo;re here</span></div><div class="rj-d">Mixed pods of four for cooperative learning.</div></div>
+    <a class="rj-tool" href="https://rjedtech.github.io/Raider-Roster-Hub/"><div class="rj-t">Raider Roster Hub <span class="rj-arrow">&rarr;</span></div><div class="rj-d">One class list for all your RJ tools, and ZipGrade without student names.</div></a>
     <a class="rj-tool" href="https://rjedtech.github.io/MyRJScheduleCleaner/"><div class="rj-t">MyRJ Schedule Cleaner <span class="rj-arrow">&rarr;</span></div><div class="rj-d">Import your MyRJ schedule into Outlook without looking busy all day.</div></a>
     <a class="rj-tool" href="https://rjedtech.github.io/cooperative-learning-toolkit/"><div class="rj-t">Cooperative Learning Toolkit <span class="rj-arrow">&rarr;</span></div><div class="rj-d">Every Kagan structure, method, and source in one place.</div></a>
     <a class="rj-tool" href="https://rjedtech.github.io/EdTech-Status/"><div class="rj-t">EdTech Status <span class="rj-arrow">&rarr;</span></div><div class="rj-d">Live status of Regis Jesuit's ed-tech systems.</div></a>
