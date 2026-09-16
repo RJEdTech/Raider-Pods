@@ -97,6 +97,7 @@ body.light .clt-list b{color:#333}
 .sec-row.off .sec-nm,.sec-row.off .sec-n{opacity:.5}
 .sec-n{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8b8b8b;white-space:nowrap}
 .sec-tag{font-size:11px;color:#9a9a9a;font-style:italic}
+.sec-src{font-size:10.5px;color:#8b8b8b;flex-basis:100%;padding-left:25px;margin-top:-3px}
 .sec-rep{font-size:11px;color:#e0788a}
 .secbox .btn:disabled{opacity:.45;cursor:default}
 body.light .sec-row{border-top-color:rgba(0,0,0,.08)}
@@ -1013,6 +1014,17 @@ function nmIsJunk(t){
 function nmSectionTitle(t){
   return t.replace(/\(\s*max\s*\d+\s*\)/ig," ").replace(/\s+/g," ").trim();
 }
+function nmClassLabel(title){
+  // "A Theology of Encounter - 3 (4W-1W-3W)" -> "4W-1W-3W \u00b7 Theology of Encounter".
+  // The whole rotation, not just its first block: blocks switch every six weeks.
+  var t=title.replace(/\s+/g," ").trim();
+  var m=t.match(/^(.*?)\s*-\s*(\d+)\s*\(([^()]*)\)\s*$/);
+  if(!m)return t;
+  var course=m[1].replace(/^(a|an|the)\s+/i,"").trim()||m[1].trim(),code=m[3].replace(/\s+/g,"");
+  if(/impact/i.test(code))return /impact/i.test(course)?course:course+" \u00b7 IMPACT";
+  if(!/^\d/.test(code))return course+" - "+m[2];
+  return code+" \u00b7 "+course;
+}
 function nmIsCourseLine(t){
   // "AP US History-BD (DE) - 4 (4R-1R-3R)" / "IMPACT 11-BD - 6 (-IMPACT)"
   return /\s-\s*\d+\s*(\([^)]*\)\s*)*$/.test(t)||/\(\s*max\s*\d+\s*\)/i.test(t);
@@ -1153,8 +1165,12 @@ function cleanRoster(raw,mode){
     if(seen[k])return;
     seen[k]=1;out.push(name);
   });
+  var usedLbl={};
   sections=sections.filter(function(S){return S.names.length}).map(function(S){
-    return {title:S.title,names:S.names,advisory:/^impact\b|\(-?\s*impact\s*\)/i.test(S.title)};
+    var lbl=nmClassLabel(S.title),k=lbl.toLowerCase(),n=2;
+    while(usedLbl[k]){lbl=nmClassLabel(S.title)+" ("+n+")";k=lbl.toLowerCase();n++}
+    usedLbl[k]=1;
+    return {title:S.title,label:lbl,names:S.names,advisory:/^impact\b|\(-?\s*impact\s*\)/i.test(S.title)};
   });
   return {names:out,changed:changed,sample:sample,sections:sections,source:src};
 }
@@ -1183,7 +1199,7 @@ function updNmPrev(){
   e.innerHTML=txt;
   renderSecBox(r);
 }
-function secLabel(S){return secNames[S.title]!==undefined?secNames[S.title]:S.title}
+function secLabel(S){return secNames[S.title]!==undefined?secNames[S.title]:(S.label||S.title)}
 function secOn(S){return secState[S.title]!==undefined?secState[S.title]:!S.advisory}
 function secCurrent(){var r=cleanRoster($("inp").value,nameMode);return r.sections.length>1&&!editCls?r.sections:[]}
 function updSecBtn(){
@@ -1206,12 +1222,13 @@ function renderSecBox(r){
   var secs=(r&&r.sections)||[];
   if(secs.length<2||editCls){box.classList.add("hid");box.innerHTML="";return}
   box.classList.remove("hid");
-  var h='<div class="sec-hd">Each class is saved separately. Tick the ones you want; you can rename them first.</div>';
+  var h='<div class="sec-hd">Each class is saved separately. Names start with the block rotation (for example 4W-1W-3W), since blocks switch every six weeks. Rename any class to what you call it.</div>';
   secs.forEach(function(S,i){
     h+='<div class="sec-row" data-i="'+i+'"><input type="checkbox" class="sec-cb" data-i="'+i+'" aria-label="'+escA(S.title)+'"'+(secOn(S)?" checked":"")+'>'+
       '<input type="text" class="sec-nm" data-i="'+i+'" value="'+escA(secLabel(S))+'" aria-label="Class name">'+
       '<span class="sec-n">'+S.names.length+' student'+(S.names.length===1?"":"s")+'</span>'+
       (S.advisory?'<span class="sec-tag">IMPACT — left unticked; tick it if you want it here</span>':'')+
+      '<span class="sec-src">myRJ name: '+esc(S.title)+'</span>'+
       '<span class="sec-rep"></span></div>';
   });
   h+='<div class="r" style="margin-top:8px;gap:10px;align-items:center"><button class="btn" id="secSave" type="button"></button><span class="rs-s" id="secNote" style="margin:0"></span></div>';
