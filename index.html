@@ -408,7 +408,7 @@ body.light #kaganArrow{color:#999}
         <div>
           <div class="rs-t">Paste your class list</div>
           <div class="rs-s">One name per line, or separated by commas. Pick how you want to sort them: drag each name into a group, or paste four ready-made lists.</div>
-          <div class="rs-s rs-src" style="margin-top:5px"><b>Fastest way to get your roster — all your classes at once:</b> in <a class="rs-lnk" href="https://regisjesuit.myschoolapp.com/app/faculty" target="_blank" rel="noopener">myRJ</a>, open any class and go to <b>Roster</b> → <b>Run Roster/Student Reports</b> → <b>Manual Attendance Sheet - By Teacher And Section</b>. Set <b>Section</b> to <b>All</b>, then <b>View/Export</b> → <b>Excel</b>. Open the file, click the <b>A</b> at the top of column A, copy, and paste it here. Every section comes in, and you tick the ones you want. (<a class="rs-lnk" href="https://rjhs.instructure.com/courses/5414/pages/printing-attendance-roster-for-your-records-to-print-for-subs" target="_blank" rel="noopener">Step-by-step guide in the Canvas PD course</a>)</div><div class="rs-s" style="margin-top:5px"><b>These paste in cleanly too:</b> the Canvas <b>People</b> page, the Canvas <b>Gradebook</b>, and the myRJ <b>Roster</b> cards — select the page, copy, paste. Parents, teachers, emails, grades and addresses are left out. Any plain list works as well.</div>
+          <div class="rs-s rs-src" style="margin-top:5px"><b>Get all your classes from myRJ at once:</b><br>1. In <a class="rs-lnk" href="https://regisjesuit.myschoolapp.com/app/faculty" target="_blank" rel="noopener">myRJ</a>, open any class and go to <b>Roster</b> → <b>Run Roster/Student Reports</b> → <b>Manual Attendance Sheet - By Teacher And Section</b>.<br>2. Set <b>Section</b> to <b>All</b>, then choose <b>View/Export</b> → <b>Excel</b>.<br>3. Open the downloaded file. Click the letter <b>A</b> above the first column to select the whole column, then press <b>Ctrl+C</b>.<br>4. Click in the box below and press <b>Ctrl+V</b>.<br>5. Your classes appear as a list. Tick the ones you want, rename them if you like (for example <b>2RW</b>), and press <b>Save</b>. Each one becomes its own class; everyone is never loaded as one big list.<br><a class="rs-lnk" href="https://rjhs.instructure.com/courses/5414/pages/printing-attendance-roster-for-your-records-to-print-for-subs" target="_blank" rel="noopener">Step-by-step guide in the Canvas PD course</a></div><div class="rs-s" style="margin-top:5px"><b>Or copy from Canvas or myRJ instead:</b> open one class's Canvas <b>People</b> page, its Canvas <b>Gradebook</b>, or its myRJ <b>Roster</b> tab. Scroll to the bottom so everyone loads, press <b>Ctrl+A</b> and then <b>Ctrl+C</b>, and paste below. Only student names are kept.</div>
         </div>
       </div>
       <div class="r" style="gap:4px;margin-bottom:10px">
@@ -1075,7 +1075,7 @@ function nmSource(lines){
 function cleanRoster(raw,mode){
   var out=[],seen={},changed=false,sample=null,sections=[];
   var lines=(raw||"").split(/\r\n|\n|\r/);
-  if(mode==="raw"){
+  if(mode==="raw"&&nmSource(lines)==="list"){
     lines.forEach(function(line){
       var t=line;
       if(t.indexOf("|")>-1||t.indexOf("\t")>-1){
@@ -1142,7 +1142,7 @@ function cleanRoster(raw,mode){
     if(!t||nmIsRule(t))return;
     if(NM_HEADERS[t.toLowerCase()]){changed=true;return}
     if(strict&&nmIsJunk(t)){changed=true;return}
-    var before=t,name=nmPerson(t,mode);
+    var before=t,name=mode==="raw"?t:nmPerson(t,mode);
     if(!name)return;
     if(name!==before){changed=true;if(!sample)sample=[before,name]}
     var k=name.toLowerCase();
@@ -1176,7 +1176,7 @@ function updNmPrev(){
   var raw=$("inp").value;
   if(!raw.trim()){e.innerHTML="";renderSecBox(null);return}
   var r=cleanRoster(raw,nameMode),txt;
-  if(r.sections.length>1&&!editCls)txt="<b>"+r.sections.length+" classes · "+r.names.length+" students</b> in this paste — tick the ones you want just below.";
+  if(r.sections.length>1&&!editCls)txt="<b>"+r.sections.length+" classes</b> found in this paste. Tick the ones you want below; each is saved as its own class, never as one big list.";
   else txt="<b>"+r.names.length+" name"+(r.names.length===1?"":"s")+"</b> ready";
   if(NM_SRCNOTE[r.source])txt+=NM_SRCNOTE[r.source];
   if(r.sample)txt+=" · “"+esc(r.sample[0])+"” becomes “<b>"+esc(r.sample[1])+"</b>”";
@@ -1466,6 +1466,8 @@ function endEdit(){
 }
 function saveEdit(){
   if(!editCls)return;
+  var multi=cleanRoster($("inp").value,nameMode).sections.length;
+  if(multi>1){toast("That paste holds "+multi+" classes. Press Cancel first, then paste it again to pick the classes you want.");return}
   var k=editCls,names=cleanRoster($("inp").value,nameMode).names;
   if(!names.length){toast("Add at least one name, or press Cancel");return}
   var keep={};names.forEach(function(n){keep[lower(n)]=1});
