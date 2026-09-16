@@ -87,6 +87,21 @@ body.light .clt-list b{color:#333}
 .rs-num{flex:0 0 auto;width:23px;height:23px;border-radius:50%;background:rgba(193,20,48,.14);border:1px solid rgba(193,20,48,.32);color:#C11430;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;margin-top:1px}
 .rs-t{font-size:13.5px;font-weight:700;color:#eee;line-height:1.3}
 .rs-s{font-size:11.5px;color:#8b8b8b;line-height:1.55;margin-top:3px;max-width:640px}
+.secbox{margin-top:10px;padding:10px 12px;border-radius:10px;border:1px solid rgba(193,20,48,.30);background:rgba(193,20,48,.06)}
+.secbox.flash{animation:secfl 1.4s ease-out}
+@keyframes secfl{0%,55%{box-shadow:0 0 0 3px rgba(193,20,48,.6)}100%{box-shadow:0 0 0 0 rgba(193,20,48,0)}}
+.sec-hd{font-size:12px;margin-bottom:6px;line-height:1.5}
+.sec-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-top:1px solid rgba(255,255,255,.07);font-size:12px}
+.sec-row input[type=checkbox]{accent-color:#C11430;width:17px;height:17px;flex:none;cursor:pointer;margin:0}
+.sec-nm{flex:1 1 230px;min-width:0;padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.22);color:inherit;font:inherit;font-size:12px}
+.sec-row.off .sec-nm,.sec-row.off .sec-n{opacity:.5}
+.sec-n{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8b8b8b;white-space:nowrap}
+.sec-tag{font-size:11px;color:#9a9a9a;font-style:italic}
+.sec-rep{font-size:11px;color:#e0788a}
+.secbox .btn:disabled{opacity:.45;cursor:default}
+body.light .sec-row{border-top-color:rgba(0,0,0,.08)}
+body.light .sec-nm{border-color:rgba(0,0,0,.18);background:#fff}
+body.light .sec-rep{color:#a3102a}
 .rs-s b{color:#bbb}
 .rs-safe{margin-top:9px;padding:9px 12px;border-left:2px solid rgba(193,20,48,.45);background:rgba(193,20,48,.05);border-radius:0 6px 6px 0;font-size:11.5px;color:#9a9a9a;line-height:1.6;max-width:660px}
 .rs-safe b{color:#ddd}
@@ -393,7 +408,7 @@ body.light #kaganArrow{color:#999}
         <div>
           <div class="rs-t">Paste your class list</div>
           <div class="rs-s">One name per line, or separated by commas. Pick how you want to sort them: drag each name into a group, or paste four ready-made lists.</div>
-          <div class="rs-s" style="margin-top:5px"><b>Need to get your roster?</b> Follow <a class="rs-lnk" href="https://rjhs.instructure.com/courses/5414/pages/printing-attendance-roster-for-your-records-to-print-for-subs" target="_blank" rel="noopener">this guide in the Canvas Professional Development course</a> — it pulls an attendance roster for any section in Excel or Word, so the names are easy to copy and paste. Any list works, though: a spreadsheet column, or names you type yourself.</div>
+          <div class="rs-s rs-src" style="margin-top:5px"><b>Fastest way to get your roster — all your classes at once:</b> in <a class="rs-lnk" href="https://regisjesuit.myschoolapp.com/app/faculty" target="_blank" rel="noopener">myRJ</a>, open any class and go to <b>Roster</b> → <b>Run Roster/Student Reports</b> → <b>Manual Attendance Sheet - By Teacher And Section</b>. Set <b>Section</b> to <b>All</b>, then <b>View/Export</b> → <b>Excel</b>. Open the file, click the <b>A</b> at the top of column A, copy, and paste it here. Every section comes in, and you tick the ones you want. (<a class="rs-lnk" href="https://rjhs.instructure.com/courses/5414/pages/printing-attendance-roster-for-your-records-to-print-for-subs" target="_blank" rel="noopener">Step-by-step guide in the Canvas PD course</a>)</div><div class="rs-s" style="margin-top:5px"><b>These paste in cleanly too:</b> the Canvas <b>People</b> page, the Canvas <b>Gradebook</b>, and the myRJ <b>Roster</b> cards — select the page, copy, paste. Parents, teachers, emails, grades and addresses are left out. Any plain list works as well.</div>
         </div>
       </div>
       <div class="r" style="gap:4px;margin-bottom:10px">
@@ -413,6 +428,8 @@ body.light #kaganArrow{color:#999}
           <button class="bo" id="edCancel">Cancel</button>
         </div>
         <textarea id="inp" placeholder="Paste student names — one per line or comma-separated"></textarea>
+        <div class="rs-s" id="nmPrev" style="margin-top:6px"></div>
+        <div class="secbox hid" id="secBox"></div>
         <div class="r" id="loadRow" style="margin-top:8px;margin-bottom:6px">
           <button class="btn" id="loadBtn">Load Names</button>
           <button class="bo hid" id="clearBtn">Clear All</button>
@@ -932,71 +949,325 @@ function moveName(name,fromQ,toQ){
 }
 
 // ===== Roster cleaner =====
-// Teachers paste straight out of the Canvas/Excel attendance roster, which arrives as
-// "Rivera, Marisol   (Sol) `27" inside a table, padded with blank rows. Clean it here so
-// nobody has to tidy a class list by hand.
+// Teachers paste from whatever they have open: the myRJ manual attendance sheet (Excel or
+// Word, one class or every section at once), the myRJ roster cards, the Canvas People page,
+// or the Canvas gradebook. Each arrives wrapped in a different kind of noise. This pulls
+// out just the students, and when an export holds several sections it keeps them apart.
 var NM_SUFFIX={jr:1,"jr.":1,sr:1,"sr.":1,ii:1,iii:1,iv:1,v:1};
-var NM_HEADERS={"name":1,"names":1,"student":1,"students":1,"student name":1,"last, first":1,"full name":1,"legal name":1};
+var NM_HEADERS={"name":1,"names":1,"student":1,"students":1,"student name":1,"student names":1,"last, first":1,"full name":1,"legal name":1};
+// Words that only ever appear as page furniture in the exports and pages teachers copy from.
+var NM_UI={};
+("present|absent|tardy|comment|comments|teacher|teachers|faculty|members|roster|total|complete|incomplete|excused|missing|late|"+
+ "skip to content|dashboard|account|admin|courses|calendar|inbox|history|commons|studio|help|home|modules|grades|gradebook|"+
+ "announcements|pages|people|assignments|quizzes|discussions|files|collaborations|outcomes|rubrics|syllabus|settings|"+
+ "assignment names|keyboard shortcuts|everyone|groups|project groups|accessibility|item banks|course analytics|"+
+ "bulletin board|topics|schedule|grading|course recommendations|back|profile|sign out|help center|lp|medical alert|"+
+ "observer|designer|ta|role|section|login id|sis id|last activity|total activity|administrative links|profile picture")
+ .split("|").forEach(function(w){NM_UI[w]=1});
+var NM_YEAR=/\s*[`'’‘ʼ]\s*\d{2,4}\s*$/;
+var NM_EMAIL=/[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
+var NM_PCT=/^\s*(\d+(\.\d+)?\s*%|\d+(\.\d+)?\s*\/\s*\d+(\.\d+)?)\s*$/;
+var NM_CARD=/^(.+?)\s+["“”]([^"“”]+)["“”]\s+(.+?)\s*[`'’‘ʼ]\s*\d{2}\s*$/;
+var NM_HONOR=/^(mr|mrs|ms|mx|miss|dr|fr|br|sr|rev)\.?\s/i;
+var NM_ROLE_OUT=/^(observing\b.*|observer|teacher|ta|teaching assistant|designer)$/i;
 var nameMode="pref";
 try{var _nm=localStorage.getItem("rr_namemode");if(_nm)nameMode=_nm}catch(e){}
 
-function cleanRoster(raw,mode){
-  var out=[],seen={},changed=false,sample=null;
-  (raw||"").split(/\r?\n/).forEach(function(line){
-    var t=line;
-    if(t.indexOf("|")>-1){
-      var cells=t.split("|").map(function(c){return c.trim()});
-      t=cells.reduce(function(a,b){return b.length>a.length?b:a},"");
-    }
-    if(t.indexOf("\t")>-1){
-      var cs=t.split("\t").map(function(c){return c.trim()});
-      t=cs.reduce(function(a,b){return b.length>a.length?b:a},"");
-    }
-    t=t.replace(/\s+/g," ").trim();
-    if(!t)return;
-    if(/^[-\u2014\u2013:_=+*.\s]+$/.test(t))return;
-    if(NM_HEADERS[t.toLowerCase()])return;
-    var before=t;
-    if(mode==="raw"){
-      var k0=t.toLowerCase();
-      if(!seen[k0]){seen[k0]=1;out.push(t)}
-      if(before!==line)changed=true;
-      return;
-    }
-    t=t.replace(/\s*[`'\u2019\u2018\u02bc]\s*\d{2,4}\s*$/,"").trim();
-    t=t.replace(/\s*\(\s*class of\s*\d{2,4}\s*\)\s*$/i,"").trim();
-    var pref=null,m=t.match(/\(([^)]*)\)/);
-    if(m){
-      var pv=m.index,pe=pv+m[0].length,inner=(m[1]||"").trim();
-      if(inner&&/[A-Za-z]/.test(inner))pref=inner;
-      t=(t.slice(0,pv)+" "+t.slice(pe)).replace(/\s+/g," ").trim();
-    }
-    t=t.replace(/^[\s,]+|[\s,]+$/g,"");
-    if(!t&&!pref)return;
-    var name;
-    if(t.indexOf(",")>-1){
-      var bits=t.split(","),last=bits.shift().trim(),first=bits.join(",").replace(/\s+/g," ").trim();
-      if(mode==="pref"&&pref)first=pref;
-      name=(first+" "+last).replace(/\s+/g," ").trim();
-    }else if(pref&&t){
-      var parts=t.split(" ");
+function nmCells(line){
+  var t=line;
+  if(t.indexOf("|")>-1)return t.split("|");
+  if(t.indexOf("\t")>-1)return t.split("\t");
+  return [t];
+}
+function nmUnquote(c){
+  c=(c||"").trim();
+  // Excel wraps a cell in quotes when it holds a line break, and doubles the quotes inside it
+  if(c.length>1&&c.charAt(0)==='"'&&c.charAt(c.length-1)==='"'&&c.slice(1,-1).indexOf('"')<0)c=c.slice(1,-1);
+  else if(/^"[^"]/.test(c)&&c.split('"').length===2)c=c.slice(1);
+  else if(/[^"]"$/.test(c)&&c.split('"').length===2)c=c.slice(0,-1);
+  return c.replace(/""/g,'"').replace(/\s+/g," ").trim();
+}
+function nmFirstCell(line){
+  var cs=nmCells(line).map(nmUnquote);
+  for(var i=0;i<cs.length;i++){if(cs[i]&&!/^\d+\.?$/.test(cs[i]))return cs[i]}
+  return "";
+}
+function nmIsRule(t){return /^[-—–:_=+*.\s]+$/.test(t)}
+// Only used once a paste is clearly an export: a hand-typed list keeps anything the teacher typed.
+function nmIsJunk(t){
+  var low=t.toLowerCase();
+  if(NM_HEADERS[low]||NM_UI[low])return true;
+  if(!/[A-Za-zÀ-ɏ]/.test(t))return true;
+  if(NM_EMAIL.test(t))return true;
+  if(/[:@\/\\#&!?|<>{}\[\]=+_*~^$%;]/.test(t))return true;
+  if(/\s[—–]\s/.test(t))return true;
+  if(NM_HONOR.test(t))return true;
+  if(/\b(high school|middle school|semester|trimester|attendance sheet|printed date)\b/i.test(t))return true;
+  var core=t.replace(NM_YEAR,"").replace(/\([^)]*\)/g," ");
+  if(/\d/.test(core))return true;
+  var words=core.trim().split(/\s+/);
+  if(words.length>6)return true;
+  if(words.length>4&&/\.$/.test(core.trim()))return true;
+  return false;
+}
+function nmSectionTitle(t){
+  return t.replace(/\(\s*max\s*\d+\s*\)/ig," ").replace(/\s+/g," ").trim();
+}
+function nmIsCourseLine(t){
+  // "AP US History-BD (DE) - 4 (4R-1R-3R)" / "IMPACT 11-BD - 6 (-IMPACT)"
+  return /\s-\s*\d+\s*(\([^)]*\)\s*)*$/.test(t)||/\(\s*max\s*\d+\s*\)/i.test(t);
+}
+function nmPerson(t,mode){
+  // returns [displayName] from one cleaned cell, or "" when nothing usable is left
+  t=t.replace(NM_YEAR,"").trim();
+  t=t.replace(/\s*\(\s*class of\s*\d{2,4}\s*\)\s*$/i,"").trim();
+  var card=t.match(/^(.+?)\s+["“”]([^"“”]+)["“”]\s+(.+)$/);
+  if(card&&card[1].indexOf(",")<0){
+    var first=card[1].trim(),nick=card[2].trim(),lastN=card[3].trim();
+    return ((mode==="pref"&&nick?nick:first)+" "+lastN).replace(/\s+/g," ").trim();
+  }
+  var pref=null,m=t.match(/\(([^)]*)\)/)||t.match(/["“”]([^"“”]+)["“”]/);
+  if(m){
+    var pv=m.index,pe=pv+m[0].length,inner=(m[1]||"").trim();
+    if(inner&&/[A-Za-zÀ-ɏ]/.test(inner))pref=inner;
+    t=(t.slice(0,pv)+" "+t.slice(pe)).replace(/\s+/g," ").trim();
+  }
+  t=t.replace(/^[\s,]+|[\s,]+$/g,"");
+  if(!t&&!pref)return "";
+  var name;
+  if(t.indexOf(",")>-1){
+    var bits=t.split(","),last=bits.shift().trim(),first2=bits.join(",").replace(/\s+/g," ").trim();
+    var sfx="",fp=first2.split(" ");
+    if(fp.length>1&&NM_SUFFIX[fp[fp.length-1].toLowerCase()]){sfx=" "+fp.pop();first2=fp.join(" ")}
+    if(mode==="pref"&&pref)first2=pref;
+    name=(first2+" "+last+sfx).replace(/\s+/g," ").trim();
+  }else if(pref&&t){
+    var parts=t.split(" ");
+    if(mode!=="pref")name=t;
+    else{
       var tail=(parts.length>1&&NM_SUFFIX[parts[parts.length-1].toLowerCase()])?parts.slice(-2):parts.slice(-1);
       name=(pref+" "+tail.join(" ")).trim();
-    }else{
-      name=t||pref||"";
     }
-    name=name.replace(/\s+/g," ").trim();
+  }else{
+    name=t||pref||"";
+  }
+  return name.replace(/\s+/g," ").trim();
+}
+// Work out where a paste came from, so each source's noise can be stripped the right way.
+function nmSource(lines){
+  var people=0,cards=0,grade=0,marks=0;
+  for(var i=0;i<lines.length;i++){
+    var L=lines[i];
+    if(L.indexOf("\t")>-1){
+      var cs=L.split("\t").map(function(c){return c.trim()});
+      if(cs[0]&&!NM_EMAIL.test(cs[0])&&cs.slice(1).some(function(c){return NM_EMAIL.test(c)}))people++;
+    }
+    if(/^\s*observing:/i.test(L))people++;
+    if(NM_CARD.test(L.trim()))cards++;
+    if(i+1<lines.length&&NM_PCT.test(lines[i+1])&&/[A-Za-z]/.test(L)&&!NM_PCT.test(L))grade++;
+    if(/attendance sheet:|printed date:|^\s*page\s+-?\d+\s+of\s+\d+\s*$/i.test(L)||NM_YEAR.test(nmFirstCell(L)))marks++;
+  }
+  if(people>=2)return "canvas-people";
+  if(cards>=2)return "myrj-roster";
+  if(grade>=2)return "canvas-gradebook";
+  return marks>=2?"export":"list";
+}
+function cleanRoster(raw,mode){
+  var out=[],seen={},changed=false,sample=null,sections=[];
+  var lines=(raw||"").split(/\r\n|\n|\r/);
+  if(mode==="raw"){
+    lines.forEach(function(line){
+      var t=line;
+      if(t.indexOf("|")>-1||t.indexOf("\t")>-1){
+        t=nmCells(t).map(function(c){return c.trim()}).reduce(function(a,b){return b.length>a.length?b:a},"");
+      }
+      t=t.replace(/\s+/g," ").trim();
+      if(!t||nmIsRule(t)||NM_HEADERS[t.toLowerCase()])return;
+      var k0=t.toLowerCase();
+      if(!seen[k0]){seen[k0]=1;out.push(t)}
+      if(t!==line)changed=true;
+    });
+    return {names:out,changed:changed,sample:sample,sections:[],source:"list"};
+  }
+  var src=nmSource(lines),strict=src!=="list";
+  var cand=[];// {text, sec}
+  var cur=null;
+  if(src==="canvas-people"){
+    // one row per person: "Name<TAB>login<TAB>SIS id", then section / role / activity lines
+    for(var i=0;i<lines.length;i++){
+      var L=lines[i];if(L.indexOf("\t")<0)continue;
+      var cs=L.split("\t").map(function(c){return c.trim()});
+      if(!cs[0]||NM_EMAIL.test(cs[0])||!cs.slice(1).some(function(c){return NM_EMAIL.test(c)}))continue;
+      var out_=false;
+      for(var j=i+1;j<lines.length&&lines[j].indexOf("\t")<0;j++){
+        if(NM_ROLE_OUT.test(lines[j].trim())){out_=true;break}
+      }
+      if(out_){changed=true;continue}
+      cand.push({text:cs[0].replace(/\s+(inactive|pending|completed)$/i,""),sec:-1});
+    }
+  }else if(src==="myrj-roster"){
+    lines.forEach(function(L){var t=L.replace(/\s+/g," ").trim();if(NM_CARD.test(t)&&!NM_HONOR.test(t))cand.push({text:t,sec:-1})});
+  }else if(src==="canvas-gradebook"){
+    for(var g=0;g+1<lines.length;g++){
+      if(NM_PCT.test(lines[g+1])&&!NM_PCT.test(lines[g]))cand.push({text:lines[g],sec:-1});
+    }
+  }else{
+    for(var s=0;s<lines.length;s++){
+      var first=nmFirstCell(lines[s]);
+      if(!first)continue;
+      if(strict){
+        // a course line directly above a "Student" header starts a new section
+        var nx=s+1;while(nx<lines.length&&!nmFirstCell(lines[nx]))nx++;
+        var nxt=nx<lines.length?nmFirstCell(lines[nx]).toLowerCase():"";
+        if((nxt==="student"||nxt==="students")&&nmIsCourseLine(first)){
+          cur={title:nmSectionTitle(first),names:[],seen:{}};sections.push(cur);
+          changed=true;continue;
+        }
+      }
+      cand.push({text:first,sec:cur?sections.length-1:-1});
+    }
+  }
+  // splitting "Anna, Ben, Cara" typed on one line
+  if(!strict){
+    var exp=[];
+    cand.forEach(function(c){
+      var n=(c.text.match(/,/g)||[]).length;
+      if(n>=2&&c.text.indexOf("(")<0)c.text.split(",").forEach(function(p){if(p.trim())exp.push({text:p,sec:c.sec})});
+      else exp.push(c);
+    });
+    cand=exp;
+  }
+  cand.forEach(function(c){
+    var t=c.text.replace(/\s+/g," ").trim();
+    if(!t||nmIsRule(t))return;
+    if(NM_HEADERS[t.toLowerCase()]){changed=true;return}
+    if(strict&&nmIsJunk(t)){changed=true;return}
+    var before=t,name=nmPerson(t,mode);
     if(!name)return;
     if(name!==before){changed=true;if(!sample)sample=[before,name]}
     var k=name.toLowerCase();
+    if(c.sec>-1){
+      var S=sections[c.sec];
+      if(!S.seen[k]){S.seen[k]=1;S.names.push(name)}
+    }
     if(seen[k])return;
     seen[k]=1;out.push(name);
   });
-  return {names:out,changed:changed,sample:sample};
+  sections=sections.filter(function(S){return S.names.length}).map(function(S){
+    return {title:S.title,names:S.names,advisory:/^impact\b|\(-?\s*impact\s*\)/i.test(S.title)};
+  });
+  return {names:out,changed:changed,sample:sample,sections:sections,source:src};
 }
 
 // Load names
+
+// ===== Paste preview + several classes in one paste =====
+// Same behaviour as the Randomizer: the myRJ export with Section = All holds every class,
+// so each section is offered as its own saved class instead of one merged pool.
+var NM_SRCNOTE={
+  "canvas-people":" · from the Canvas People page, with parents and teachers left out. Canvas only shows the first 50 people until you scroll, so scroll to the bottom before you copy",
+  "canvas-gradebook":" · from the Canvas Gradebook, with grades and assignment names left out",
+  "myrj-roster":" · from the myRJ roster cards, with emails, addresses and phone numbers left out. Scroll to the bottom of the roster before you copy so every card has loaded"
+};
+var secState={},secNames={};
+function escA(t){return esc(t).replace(/"/g,"&quot;")}
+function updNmPrev(){
+  var e=$("nmPrev");if(!e)return;
+  var raw=$("inp").value;
+  if(!raw.trim()){e.innerHTML="";renderSecBox(null);return}
+  var r=cleanRoster(raw,nameMode),txt;
+  if(r.sections.length>1&&!editCls)txt="<b>"+r.sections.length+" classes · "+r.names.length+" students</b> in this paste — tick the ones you want just below.";
+  else txt="<b>"+r.names.length+" name"+(r.names.length===1?"":"s")+"</b> ready";
+  if(NM_SRCNOTE[r.source])txt+=NM_SRCNOTE[r.source];
+  if(r.sample)txt+=" · “"+esc(r.sample[0])+"” becomes “<b>"+esc(r.sample[1])+"</b>”";
+  e.innerHTML=txt;
+  renderSecBox(r);
+}
+function secLabel(S){return secNames[S.title]!==undefined?secNames[S.title]:S.title}
+function secOn(S){return secState[S.title]!==undefined?secState[S.title]:!S.advisory}
+function secCurrent(){var r=cleanRoster($("inp").value,nameMode);return r.sections.length>1&&!editCls?r.sections:[]}
+function updSecBtn(){
+  var box=$("secBox");if(!box||box.classList.contains("hid"))return;
+  var secs=secCurrent(),n=0,sv=getSv();
+  secs.forEach(function(S,i){
+    var on=secOn(S);if(on)n++;
+    var row=box.querySelector('.sec-row[data-i="'+i+'"]');if(!row)return;
+    row.classList.toggle("off",!on);
+    var rp=row.querySelector(".sec-rep"),nm=secLabel(S).trim();
+    if(rp)rp.textContent=on&&nm&&sv[nm]?"replaces the saved class with this name, and its sorting":"";
+  });
+  var b=$("secSave");
+  b.textContent=n===1?"Save 1 class":"Save "+n+" classes";
+  b.disabled=!n;
+  $("secNote").textContent=n?"The first one opens in the Unsorted Pool; the rest wait in your saved classes, one tap each.":"Tick at least one class.";
+}
+function renderSecBox(r){
+  var box=$("secBox");if(!box)return;
+  var secs=(r&&r.sections)||[];
+  if(secs.length<2||editCls){box.classList.add("hid");box.innerHTML="";return}
+  box.classList.remove("hid");
+  var h='<div class="sec-hd">Each class is saved separately. Tick the ones you want; you can rename them first.</div>';
+  secs.forEach(function(S,i){
+    h+='<div class="sec-row" data-i="'+i+'"><input type="checkbox" class="sec-cb" data-i="'+i+'" aria-label="'+escA(S.title)+'"'+(secOn(S)?" checked":"")+'>'+
+      '<input type="text" class="sec-nm" data-i="'+i+'" value="'+escA(secLabel(S))+'" aria-label="Class name">'+
+      '<span class="sec-n">'+S.names.length+' student'+(S.names.length===1?"":"s")+'</span>'+
+      (S.advisory?'<span class="sec-tag">IMPACT — left unticked; tick it if you want it here</span>':'')+
+      '<span class="sec-rep"></span></div>';
+  });
+  h+='<div class="r" style="margin-top:8px;gap:10px;align-items:center"><button class="btn" id="secSave" type="button"></button><span class="rs-s" id="secNote" style="margin:0"></span></div>';
+  box.innerHTML=h;
+  box.querySelectorAll(".sec-cb").forEach(function(cb){
+    cb.addEventListener("change",function(){var S=secCurrent()[+cb.getAttribute("data-i")];if(S){secState[S.title]=cb.checked;updSecBtn()}});
+  });
+  box.querySelectorAll(".sec-nm").forEach(function(inp){
+    inp.addEventListener("input",function(){var S=secCurrent()[+inp.getAttribute("data-i")];if(S){secNames[S.title]=inp.value;updSecBtn()}});
+    inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();secSaveAll()}});
+  });
+  $("secSave").addEventListener("click",secSaveAll);
+  updSecBtn();
+}
+function secSaveAll(){
+  var pick=secCurrent().filter(secOn);
+  if(!pick.length){toast("Tick at least one class.");return}
+  var sv=getSv(),used={},clash=[];
+  for(var i=0;i<pick.length;i++){
+    var nm=secLabel(pick[i]).replace(/\s+/g," ").trim()||pick[i].title;
+    if(used[nm.toLowerCase()]){toast('Two classes are both named "'+nm+'" — rename one first');return}
+    used[nm.toLowerCase()]=1;
+    if(sv[nm])clash.push(nm);
+  }
+  if(clash.length&&!confirm("Replace your saved "+(clash.length===1?"class":"classes")+" "+clash.map(function(c){return '"'+c+'"'}).join(", ")+"? Any sorting saved in "+(clash.length===1?"it":"them")+" is cleared."))return;
+  var cur=allStudents();
+  if(cur.length&&!savedNameFor(cur)&&!confirm("The "+cur.length+" students on screen are not saved. Replace them with the first class you are saving?"))return;
+  var first=null;
+  pick.forEach(function(S){
+    var nm=secLabel(S).replace(/\s+/g," ").trim()||S.title;
+    sv[nm]={quartiles:{1:[],2:[],3:[],4:[]},unsorted:S.names.slice(),neverPairs:[]};
+    if(!first)first=nm;
+  });
+  setSv(sv);
+  secState={};secNames={};
+  $("inp").value="";
+  loadClassInto(first);
+  switchMode("drag");
+  $("step1Done").removeAttribute("data-open");
+  renderAll();updNmPrev();
+  if(typeof renderSaved==="function")renderSaved();
+  if(typeof renderX==="function")renderX();
+  showPool();
+  toast(pick.length===1?'Saved 1 class — "'+first+'" is in the pool':"Saved "+pick.length+' classes — "'+first+'" is in the pool, the rest are one tap away');
+}
+function secRedirect(){
+  var secs=secCurrent();if(secs.length<2)return false;
+  var b=$("secBox");
+  b.scrollIntoView({behavior:"smooth",block:"center"});
+  b.classList.remove("flash");void b.offsetWidth;b.classList.add("flash");
+  toast("This paste has "+secs.length+" classes — tick the ones you want, then Save");
+  return true;
+}
+$("inp").addEventListener("input",updNmPrev);
 $("loadBtn").addEventListener("click",function(){
+  if(secRedirect())return;
   var names=cleanRoster($("inp").value,nameMode).names;
   if(!names.length)return;
   var existing={};allStudents().forEach(function(n){existing[n]=1});
