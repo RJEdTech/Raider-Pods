@@ -339,6 +339,16 @@ body.light #kaganArrow{color:#999}
 </style>
 </head>
 <body>
+<script>
+/* Light/dark follows the operating system setting. No in-page toggle by design. */
+(function(){
+  var mq = window.matchMedia("(prefers-color-scheme: light)");
+  function apply(){ document.body.classList.toggle("light", mq.matches); }
+  apply();
+  if (mq.addEventListener) mq.addEventListener("change", apply);
+  else if (mq.addListener) mq.addListener(apply);
+})();
+</script>
 <div class="watermark" aria-hidden="true"></div>
 <div class="ctr">
   <header class="site-header">
@@ -351,10 +361,6 @@ body.light #kaganArrow{color:#999}
     </div>
     <div class="hdr-tools">
       <button class="hdr-pill" id="fsTgl" type="button" title="Present mode — fills the screen and blows the pods up for the projector">⛶ Fullscreen</button>
-      <button class="icon-btn theme-toggle" id="themeTgl" type="button" aria-label="Toggle dark mode">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-      </button>
     </div>
   </header>
 
@@ -739,14 +745,6 @@ function copyText(t){navigator.clipboard.writeText(t).then(function(){toast("Cop
 function getSv(){try{return JSON.parse(localStorage.getItem("rr_pods_v3")||"{}")}catch(e){return{}}}
 function setSv(d){try{localStorage.setItem("rr_pods_v3",JSON.stringify(d))}catch(e){}}
 
-// Theme
-var stored=null;try{stored=localStorage.getItem("rr_pod_theme")}catch(e){}
-var isLight = stored ? (stored==="light") : true;            // light default
-document.body.classList.toggle("light",isLight);
-$("themeTgl").addEventListener("click",function(){
-  isLight=!isLight;document.body.classList.toggle("light",isLight);
-  try{localStorage.setItem("rr_pod_theme",isLight?"light":"dark")}catch(e){}
-});
 
 // ===== Present mode =====
 var isFs=false,fitting=false,fitReq=0;
@@ -1356,7 +1354,7 @@ $("podSaveBtn").addEventListener("click",saveClass);
 $("nudgeX").addEventListener("click",function(){nudgeOff=true;$("saveNudge").classList.add("hid")});
 
 // Backup / restore
-var BKKEYS=["rr_pods_v3","rr_pod_theme"];
+var BKKEYS=["rr_pods_v3"];
 function bkExport(){
   var d={_app:"raider-pods",_v:1,_date:new Date().toISOString()};
   BKKEYS.forEach(function(k){try{var v=localStorage.getItem(k);if(v!==null)d[k]=v}catch(e){}});
