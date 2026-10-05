@@ -62,6 +62,3 @@ Both modes support rearranging students between quartiles after the initial sort
 5. Click **Generate Pods**
 6. Reshuffle as needed — quartile assignments are preserved
 
-## Built by
-
-Jason Beyer, Director of Educational Technology — Regis Jesuit High School
